@@ -67,3 +67,27 @@ test('chat history, images, tool results and structured output mapping', () => {
   assert.equal(p.input[2].type, 'function_call'); assert.equal(p.input[3].call_id, 'c');
   assert.equal(p.text.format.name, 'answer');
 });
+test('desktop controls authenticate, coalesce login, and return UTF-8 installation identity', async t => {
+  let resolveLogin, count = 0, cancelled = false;
+  const client = {
+    getSession: async () => ({ status: 'disconnected', sharing: false }),
+    signIn: () => { count++; return new Promise(resolve => { resolveLogin = resolve; }); },
+    cancelSignIn: () => { cancelled = true; },
+  };
+  const server = createGateway({ apiKey: 'desktop', client, installDir: 'C:\\安装目录', autoLogin: false });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); server.close(); });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = { authorization: 'Bearer desktop' };
+  assert.equal((await fetch(base + '/admin/login', { method: 'POST' })).status, 401);
+  assert.equal(count, 0);
+  const status = await fetch(base + '/admin/status', { headers });
+  assert.match(status.headers.get('content-type'), /charset=utf-8/);
+  assert.equal((await status.json()).installDir, 'C:\\安装目录');
+  await Promise.all([1, 2].map(() => fetch(base + '/admin/login', { method: 'POST', headers })));
+  assert.equal(count, 1);
+  assert.equal((await (await fetch(base + '/admin/status', { headers })).json()).status, 'connecting');
+  resolveLogin({ sharing: true });
+  assert.equal((await fetch(base + '/admin/shutdown', { method: 'POST', headers })).status, 202);
+  assert.equal(cancelled, true);
+});

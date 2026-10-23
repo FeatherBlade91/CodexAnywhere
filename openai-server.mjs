@@ -5,23 +5,41 @@ import { readSSE } from './protocol.mjs';
 import { ResponseAccumulator } from './response-accumulator.mjs';
 import { chatPayload, chatResult, usage } from './openai-protocol.mjs';
 const hash = s => createHash('sha256').update(String(s)).digest();
-const json = (res, status, value) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(value)); };
-export function createGateway({ apiKey, client, request, listModels, autoLogin = true }) {
+const json = (res, status, value) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(value)); };
+export function createGateway({ apiKey, client, request, listModels, autoLogin = true, installDir = '' }) {
   let login;
-  async function ensureSession() {
+  let loginError;
+  async function ensureSession(explicit = false) {
     if (!login) login = (async () => {
       const session = await client.getSession();
       if (session.sharing) return;
-      if (!autoLogin) throw Object.assign(new Error('Run node gateway.mjs login first'), { status: 401, code: 'login_required' });
+      if (!autoLogin && !explicit) throw Object.assign(new Error('Run node gateway.mjs login first'), { status: 401, code: 'login_required' });
       if (!(await client.signIn()).sharing) throw Object.assign(new Error('ChatGPT sharing permission is required'), { status: 403 });
     })().finally(() => { login = undefined; });
     return login;
   }
-  return createServer(async (req, res) => {
+  const server = createServer(async (req, res) => {
     const path = new URL(req.url, 'http://localhost').pathname;
     if (req.method === 'GET' && path === '/health') return json(res, 200, { service: 'chatgpt-openai-gateway', status: 'ok' });
     const key = req.headers.authorization?.replace(/^Bearer /i, '') || req.headers['x-api-key'] || '';
     if (!apiKey || !timingSafeEqual(hash(key), hash(apiKey))) return json(res, 401, { error: { message: 'Invalid API key', type: 'authentication_error', code: 'invalid_api_key', param: null } });
+    if (path === '/admin/shutdown' && req.method === 'POST') {
+      json(res, 202, { status: 'draining' });
+      client.cancelSignIn?.();
+      server.close(); server.closeIdleConnections();
+      return;
+    }
+    if (path === '/admin/login' && req.method === 'POST') {
+      loginError = undefined;
+      ensureSession(true).catch(e => { loginError = e.code || 'login_failed'; });
+      return json(res, 202, { status: 'connecting' });
+    }
+    if (path === '/admin/status' && req.method === 'GET') {
+      try {
+        const session = login ? { status: 'connecting', sharing: false } : await client.getSession();
+        return json(res, 200, { status: session.status, sharing: session.sharing, loginError, installDir });
+      } catch { return json(res, 503, { error: { message: 'Could not read login status' } }); }
+    }
     const chat = path === '/v1/chat/completions';
     const isModels = req.method === 'GET' && path === '/v1/models';
     if (!isModels && !(req.method === 'POST' && (chat || path === '/v1/responses'))) return json(res, 404, { error: { message: 'Unknown endpoint', type: 'invalid_request_error', code: 'not_found' } });
@@ -95,4 +113,5 @@ export function createGateway({ apiKey, client, request, listModels, autoLogin =
       else json(res, status, { error });
     }
   });
+  return server;
 }

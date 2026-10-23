@@ -7,6 +7,8 @@
                     "start":  "node server.mjs",
                     "gateway":  "node gateway.mjs",
                     "test:gateway":  "node --test tests/gateway.test.mjs",
+                    "build:gateway":  "powershell -NoProfile -ExecutionPolicy Bypass -File build-gateway.ps1",
+                    "test:gateway-installer":  "node tests/gateway-installer.mjs",
                     "test":  "node --test test.mjs integration.test.mjs detect-cc.test.mjs restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs",
                     "test:e2e":  "node e2e.mjs"
                 },

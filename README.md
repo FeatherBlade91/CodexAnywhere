@@ -4,6 +4,8 @@
 
 ## URL + API Key 中间层
 
+Windows 用户可直接下载独立的 [ChatGPT API Gateway 安装包](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/tag/gateway-v1.0.0)。安装后打开窗口，复制 URL 和 API Key 即可配置其他软件；无需另装 Node.js。普通 Intel / AMD 电脑选 x64，Windows 11 ARM 电脑选 ARM64。
+
 在 Windows 上安装 Node.js 24，然后在仓库目录运行：
 
 ```powershell
@@ -32,7 +34,7 @@ node gateway.mjs config
 
 支持 `/v1/chat/completions`、`/v1/responses` 和 `/v1/models`，包括普通响应、SSE 流式输出及函数工具调用。中间层使用独立目录 `%LOCALAPPDATA%\ChatGPTGateway`，无需安装 Claude Code 或 CC Switch，也不会修改它们的配置。
 
-目前通过源码启动；下方的 Windows 安装包用于 Claude Code 集成。配置项、Python 示例和接口限制见 [GATEWAY.md](GATEWAY.md)。新增接口已通过模拟上游的 OpenAI SDK 测试，真实账户授权和调用尚未实测。
+Gateway 安装包与下方的 Claude Code 集成安装包分别发布。配置项、Python 示例和接口限制见 [GATEWAY.md](GATEWAY.md)。新增接口已通过模拟上游的 OpenAI SDK 测试，真实账户授权和调用尚未实测。
 
 ## Claude Code 集成
 

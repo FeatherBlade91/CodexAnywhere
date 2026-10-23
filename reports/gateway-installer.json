@@ -1,0 +1,36 @@
+{
+  "platform": "win32",
+  "arch": "x64",
+  "date": "2026-10-23T16:40:43.758Z",
+  "sha256": "f507a9e9db72157962869d77b774478ee5e9ce7549d562941c24c385b48769b3",
+  "cases": [
+    {
+      "name": "silent install to a Unicode path without Node or Claude prerequisites",
+      "passed": true
+    },
+    {
+      "name": "package excludes Claude Code integration",
+      "passed": true
+    },
+    {
+      "name": "native manager opens and starts bundled gateway",
+      "passed": true
+    },
+    {
+      "name": "management endpoints require local key; disabled auto-login opens no browser",
+      "passed": true
+    },
+    {
+      "name": "starting an already running installation is idempotent",
+      "passed": true
+    },
+    {
+      "name": "upgrade stops service and preserves API key",
+      "passed": true
+    },
+    {
+      "name": "uninstall stops service and retains user data",
+      "passed": true
+    }
+  ]
+}
