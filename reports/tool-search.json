@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-23T14:38:16.300Z",
+  "requests": [
+    {
+      "model": "gpt-6.1-sol",
+      "tools": [
+        {
+          "name": "DeferredToolPlaceholder",
+          "deferred": true,
+          "hasSchema": true
+        },
+        {
+          "name": "ToolSearch",
+          "deferred": false,
+          "hasSchema": true
+        }
+      ],
+      "references": [],
+      "toolCalls": []
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "tools": [
+        {
+          "name": "ToolSearch",
+          "deferred": false,
+          "hasSchema": true
+        },
+        {
+          "name": "DeferredToolPlaceholder",
+          "deferred": true,
+          "hasSchema": true
+        },
+        {
+          "name": "mcp__bridge_fixture__read_verification_marker",
+          "deferred": true,
+          "hasSchema": true
+        }
+      ],
+      "references": [
+        "mcp__bridge_fixture__read_verification_marker"
+      ],
+      "toolCalls": [
+        "ToolSearch"
+      ]
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "tools": [
+        {
+          "name": "ToolSearch",
+          "deferred": false,
+          "hasSchema": true
+        },
+        {
+          "name": "DeferredToolPlaceholder",
+          "deferred": true,
+          "hasSchema": true
+        },
+        {
+          "name": "mcp__bridge_fixture__read_verification_marker",
+          "deferred": true,
+          "hasSchema": true
+        }
+      ],
+      "references": [
+        "mcp__bridge_fixture__read_verification_marker"
+      ],
+      "toolCalls": [
+        "ToolSearch",
+        "mcp__bridge_fixture__read_verification_marker"
+      ]
+    }
+  ],
+  "passed": true,
+  "requestedModel": "gpt-6.1-sol",
+  "exitCode": 0,
+  "markerReturned": true,
+  "toolReferenceObserved": true,
+  "searchCalled": true,
+  "deferredToolCalled": true
+}

@@ -1,0 +1,16 @@
+{
+  "start": "2026-10-23T14:38:06.880Z",
+  "status": 200,
+  "requested": "ccs-claude-openai--gpt-6-luna[1M]",
+  "responseModel": "gpt-6-luna",
+  "text": "STACK_LUNA_OK",
+  "logs": [
+    {
+      "model": "gpt-6-luna",
+      "requestedEffort": "low",
+      "confirmedEffort": "low",
+      "result": "completed"
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-23T14:25:12.766Z",
+  "platform": "win32",
+  "arch": "x64",
+  "cases": [
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-6.1-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6.1-sol using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-6.1-sol",
+      "passed": true,
+      "output": "TOOL_OK_c44759357f241824\nPASS: Claude Code tools via gpt-6.1-sol using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-6-astra",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6-astra using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-6-astra",
+      "passed": true,
+      "output": "TOOL_OK_b3fb321af5324631\nPASS: Claude Code tools via gpt-6-astra using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-6-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6-sol using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-6-sol",
+      "passed": true,
+      "output": "TOOL_OK_a8a0627c4e521add\nPASS: Claude Code tools via gpt-6-sol using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-6-luna",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6-luna using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-6-luna",
+      "passed": true,
+      "output": "TOOL_OK_a168b2001bc383b8\nPASS: Claude Code tools via gpt-6-luna using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-5.6-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-5.6-sol using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-5.6-sol",
+      "passed": true,
+      "output": "TOOL_OK_9718f267016f79fa\nPASS: Claude Code tools via gpt-5.6-sol using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-5.6-terra",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-5.6-terra using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-5.6-terra",
+      "passed": true,
+      "output": "TOOL_OK_4666224c61896ac4\nPASS: Claude Code tools via gpt-5.6-terra using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "low",
+      "model": "gpt-5.6-luna",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-5.6-luna using ChatGPT plan"
+    },
+    {
+      "mode": "tools",
+      "effort": "low",
+      "model": "gpt-5.6-luna",
+      "passed": true,
+      "output": "TOOL_OK_479bc28967d9a751\nPASS: Claude Code tools via gpt-5.6-luna using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "medium",
+      "model": "gpt-6.1-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6.1-sol using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "high",
+      "model": "gpt-6.1-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6.1-sol using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "xhigh",
+      "model": "gpt-6.1-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6.1-sol using ChatGPT plan"
+    },
+    {
+      "mode": "text",
+      "effort": "max",
+      "model": "gpt-6.1-sol",
+      "passed": true,
+      "output": "CLAUDE_SOL_OK\nPASS: Claude Code text via gpt-6.1-sol using ChatGPT plan"
+    }
+  ],
+  "effortConfirmation": [
+    {
+      "effort": "low",
+      "passed": true
+    },
+    {
+      "effort": "medium",
+      "passed": true
+    },
+    {
+      "effort": "high",
+      "passed": true
+    },
+    {
+      "effort": "xhigh",
+      "passed": true
+    },
+    {
+      "effort": "max",
+      "passed": true
+    }
+  ]
+}

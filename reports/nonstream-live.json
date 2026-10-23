@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-23T14:37:36.993Z",
+  "cases": [
+    {
+      "mode": "text",
+      "passed": true,
+      "model": "gpt-6-luna",
+      "stopReason": "end_turn",
+      "outputTokens": 7
+    },
+    {
+      "mode": "tool",
+      "passed": true,
+      "model": "gpt-6-luna",
+      "stopReason": "tool_use",
+      "outputTokens": 22
+    }
+  ]
+}

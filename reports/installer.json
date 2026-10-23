@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-23T14:35:25.932Z",
+  "platform": "win32",
+  "arch": "x64",
+  "artifact": {
+    "name": "ChatGPT-Plan-Bridge-Setup-1.0.0.exe",
+    "sha256": "f7583fd79c82f59f9732d90f971b28c0c785ea65889761094f35c531a003bf11"
+  },
+  "cases": [
+    {
+      "name": "silent direct mode requires explicit overwrite consent",
+      "passed": true
+    },
+    {
+      "name": "missing CC Switch blocks CC mode before installation",
+      "passed": true
+    },
+    {
+      "name": "direct install to Chinese path with spaces",
+      "passed": true
+    },
+    {
+      "name": "installed bundled runtime writes direct settings with backup",
+      "passed": true
+    },
+    {
+      "name": "direct uninstall restores original settings",
+      "passed": true
+    },
+    {
+      "name": "CC Switch mode installs with initialized database",
+      "passed": true
+    },
+    {
+      "name": "CC mode registration preserves live Claude settings",
+      "passed": true
+    },
+    {
+      "name": "CC uninstall removes only owned provider",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+node_modules/
+vendor/siwc/*.js
+*.log
+build/
+dist/
+.tools/
+test-results/
+*.db
+*.db-*
+bridge.json
+chatgpt-auth.json
+auth/
+backups/
+*-restore.json
+.env
+.env.*

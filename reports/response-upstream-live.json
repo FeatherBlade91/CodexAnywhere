@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-23T14:27:58.904Z",
+  "cases": [
+    {
+      "mode": "text",
+      "passed": true,
+      "specificToolChoice": false,
+      "terminalOutputCount": 0,
+      "reconstructedOutputCount": 1,
+      "stopReason": "end_turn",
+      "outputTokens": 8,
+      "eventTypes": [
+        "response.created",
+        "response.in_progress",
+        "response.output_item.added",
+        "response.content_part.added",
+        "response.output_text.delta",
+        "response.output_text.delta",
+        "response.output_text.delta",
+        "response.output_text.delta",
+        "response.metadata",
+        "response.output_text.done",
+        "response.content_part.done",
+        "response.output_item.done",
+        "response.completed"
+      ]
+    },
+    {
+      "mode": "tool",
+      "passed": true,
+      "specificToolChoice": true,
+      "terminalOutputCount": 0,
+      "reconstructedOutputCount": 1,
+      "stopReason": "tool_use",
+      "outputTokens": 21,
+      "eventTypes": [
+        "response.created",
+        "response.in_progress",
+        "response.output_item.added",
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.delta",
+        "response.metadata",
+        "response.function_call_arguments.done",
+        "response.output_item.done",
+        "response.completed"
+      ]
+    },
+    {
+      "mode": "typed_validation_error",
+      "passed": true,
+      "status": 400,
+      "code": "unknown_parameter"
+    }
+  ]
+}
