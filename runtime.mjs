@@ -43,7 +43,7 @@ function dpapi(operation, input) {
   });
 }
 export const client = createChatGPT({
-  appName: 'ChatGPT Claude Bridge', appId: 'chatgpt-claude-bridge', sendHostId: true,
+  appName: process.env.CHATGPT_BRIDGE_APP_NAME || 'ChatGPT Claude Bridge', appId: process.env.CHATGPT_BRIDGE_APP_ID || 'chatgpt-claude-bridge', sendHostId: true,
   redirectPort: 0, storageDir: join(stateDir, 'auth'),
   credentialEncryption: {
     id: 'windows-dpapi-current-user-v1', isAvailable: () => process.platform === 'win32',

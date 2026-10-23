@@ -1,5 +1,41 @@
 # ChatGPT Plan Bridge
 
+把 ChatGPT 订阅接入支持 OpenAI 兼容接口的软件，或在 Claude Code 中使用账户可调用的模型。两种方式都通过官方 Sign in with ChatGPT 登录，实际模型和额度由账户权限决定。
+
+## URL + API Key 中间层
+
+在 Windows 上安装 Node.js 24，然后在仓库目录运行：
+
+```powershell
+npm ci
+npm run build
+npm run gateway
+```
+
+另开一个终端，查看连接地址和密钥：
+
+```powershell
+node gateway.mjs config
+```
+
+在软件中选择 OpenAI 兼容提供商，填入以下配置：
+
+| 配置项 | 填写内容 |
+| --- | --- |
+| Base URL | `http://127.0.0.1:17864/v1` |
+| API Key | 上述命令输出的 `apiKey` |
+| 模型 | 通过软件获取模型列表，或调用 `GET /v1/models` 查看 |
+
+首次运行会生成随机 API Key，保存在本地，重启后继续使用。这个 Key 用于连接中间层；ChatGPT 的 OAuth 凭据由中间层单独保存。
+
+第一次携带正确 Key 的有效请求会自动打开 ChatGPT 登录页面，授权后继续执行。如果软件在登录期间超时，登录完成后重试即可。也可以先运行 `node gateway.mjs login`。
+
+支持 `/v1/chat/completions`、`/v1/responses` 和 `/v1/models`，包括普通响应、SSE 流式输出及函数工具调用。中间层使用独立目录 `%LOCALAPPDATA%\ChatGPTGateway`，无需安装 Claude Code 或 CC Switch，也不会修改它们的配置。
+
+目前通过源码启动；下方的 Windows 安装包用于 Claude Code 集成。配置项、Python 示例和接口限制见 [GATEWAY.md](GATEWAY.md)。新增接口已通过模拟上游的 OpenAI SDK 测试，真实账户授权和调用尚未实测。
+
+## Claude Code 集成
+
 通过官方 **Sign in with ChatGPT** 授权，让 Claude Code CLI 使用 ChatGPT 订阅允许调用的模型。本地服务将 Anthropic Messages 转换为 OpenAI Responses；不运行 Codex CLI、不嵌套 coding agent、不使用网页 Cookie。
 
 ## 安装
