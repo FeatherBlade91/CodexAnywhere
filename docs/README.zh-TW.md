@@ -2,7 +2,7 @@
 
 # Codex-Anywhere
 
-[简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [English](../README.md)
+[简体中文](../README.md) · [繁體中文](README.zh-TW.md) · [English](README.en.md)
 
 **透過本機 API Key 使用 ChatGPT 訂閱額度。**
 
@@ -108,7 +108,7 @@ npm run test:desktop     # 桌面介面測試
 npm run dist             # 建置 Windows 桌面安裝程式
 ```
 
-安裝程式名稱為 `Codex-Anywhere-Setup-2.0.0-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
+安裝程式名稱為 `Codex-Anywhere-Setup-1.0.0-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
 
 開發約定和測試隔離見 [CONTRIBUTING.md](CONTRIBUTING.md)。請保留[第三方聲明](THIRD-PARTY-NOTICES.md)、[專案授權](../LICENSE)及 [OpenAI Devkit 授權](../vendor/siwc/LICENSE)。
 

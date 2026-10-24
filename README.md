@@ -2,100 +2,100 @@
 
 # Codex-Anywhere
 
-[简体中文](docs/README.zh-CN.md) · [繁體中文](docs/README.zh-TW.md) · [English](README.md)
+[简体中文](README.md) · [繁體中文](docs/README.zh-TW.md) · [English](docs/README.en.md)
 
-**Use your ChatGPT subscription through a local API key.**
+**通过本地 API Key 使用 ChatGPT 订阅额度。**
 
-[Download for Windows](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [Usage guide](docs/USER-GUIDE.txt) · [Contributing](docs/CONTRIBUTING.md)
+[下载 Windows 桌面版](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [使用指南](docs/USER-GUIDE.txt) · [参与开发](docs/CONTRIBUTING.md)
 
 ![Windows x64](https://img.shields.io/badge/Windows-x64-36665D?style=flat-square)
 ![Electron desktop](https://img.shields.io/badge/Electron-desktop-506479?style=flat-square)
-[![Noncommercial](https://img.shields.io/badge/license-noncommercial-737B82?style=flat-square)](LICENSE)
+[![非商业许可](https://img.shields.io/badge/license-noncommercial-737B82?style=flat-square)](LICENSE)
 
 </div>
 
-![Codex-Anywhere desktop showing ChatGPT sign-in and OpenAI and Claude Code connection controls](docs/assets/desktop.png)
+![Codex-Anywhere 桌面界面，包含 ChatGPT 登录、OpenAI 应用和 Claude Code 连接设置](docs/assets/desktop.png)
 
-*Actual Electron window before sign-in, captured with isolated test data and a masked key. The temporary test port shown differs from the default `17863`.*
+*真实 Electron 未登录界面，使用隔离测试数据，密钥已遮蔽。截图为临时测试端口，默认端口为 `17863`。*
 
-Codex-Anywhere brings the former **Plan Bridge** and **API Gateway** together in one standalone Electron application. Sign in once, start one local service, and connect Claude Code or applications that accept an OpenAI-compatible API. Desktop installers are the only release format.
+Codex-Anywhere 将原来的 **Plan Bridge** 和 **API Gateway** 合并为独立的 Electron 桌面软件。登录一次，启动一个本地服务，即可连接 Claude Code 或支持 OpenAI 兼容接口的应用。Release 只提供桌面安装包。
 
-The app uses OpenAI's Sign in with ChatGPT Devkit. Eligible accounts can authorize requests against their ChatGPT plan allowance through this [documented integration](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt). It does not reverse-proxy the ChatGPT website or reuse browser cookies. The bridge translates client requests locally; its API key secures that local service and is not an OpenAI platform API key.
+软件使用 OpenAI 的 Sign in with ChatGPT Devkit，通过[官方文档介绍的授权方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，让符合条件的账号使用自己的 ChatGPT 套餐额度。它不反代 ChatGPT 网页，也不复用浏览器 Cookie。本地服务负责转换客户端请求；生成的 API Key 用于访问这个本地服务，并非 OpenAI 平台 API Key。
 
-Use remains subject to account eligibility, plan limits, OpenAI's terms, and the Devkit's noncommercial license. This integration does not establish blanket compliance for every use or guarantee that an account cannot be suspended; OpenAI's [Terms of Use](https://openai.com/policies/terms-of-use/) still apply.
+使用时仍须满足账号资格、套餐限制、OpenAI 条款和 Devkit 的非商业许可。采用官方授权方式不等于任何用途都完全合规，也不能保证零封号风险；具体使用须遵守 [OpenAI 使用条款](https://openai.com/policies/terms-of-use/)。
 
 ```mermaid
 flowchart RL
-    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere desktop]
-    A[OpenAI-compatible apps] -->|Chat Completions / Responses| B
-    B -->|One account · one local service| S[ChatGPT subscription models]
+    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere 桌面版]
+    A[OpenAI 兼容应用] -->|Chat Completions / Responses| B
+    B -->|同一账号 · 同一本地服务| S[ChatGPT 订阅模型]
 ```
 
-## Get connected
+## 开始使用
 
-1. Download the Windows x64 installer from [the latest release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) and open **Codex-Anywhere**. The desktop package includes its runtime; a separate Node.js installation is unnecessary.
-2. Sign in with ChatGPT in your browser, then refresh the available models.
-3. Start the local service. Copy its URL and local API key into your application, or use the Claude Code connection controls.
+1. 从[最新 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) 下载 Windows x64 安装包，安装并打开 **Codex-Anywhere**。安装包包含运行环境，无须另装 Node.js。
+2. 在浏览器中完成 ChatGPT 登录，再刷新可用模型。
+3. 启动本地服务。将地址和本地 API Key 复制到应用，或使用界面中的 Claude Code 接入功能。
 
-Claude Code and CC Switch are optional, separately installed clients. You do not need either for OpenAI-compatible applications.
+Claude Code 和 CC Switch 是可选客户端，需要单独安装。使用 OpenAI 兼容应用时不需要它们。
 
-## One place for every connection
+## 一个窗口管理连接
 
-| You want to… | In Codex-Anywhere |
+| 想做什么 | 在 Codex-Anywhere 中操作 |
 | --- | --- |
-| Use an OpenAI-compatible app | Copy the base URL and local API key; use `/v1/models` to find a model ID. |
-| Connect Claude Code | Apply direct configuration, or add the provider to CC Switch. |
-| Change models | Refresh the account catalog and choose from the available models. |
-| Manage the service | Start or stop it and check its status. |
-| Adjust your setup | Set a proxy or launch the app when you sign in to Windows. |
-| Undo client configuration | Restore the backed-up settings through the integration controls. |
+| 连接 OpenAI 兼容应用 | 复制 Base URL 和 API Key；通过 `/v1/models` 获取模型 ID。 |
+| 连接 Claude Code | 应用直连配置，或添加 CC Switch 供应商。 |
+| 选择模型 | 刷新账号模型列表，从可用模型中选择。 |
+| 管理服务 | 启动、停止、查看状态。 |
+| 调整运行方式 | 设置代理或 Windows 登录时启动。 |
+| 撤销客户端配置 | 通过接入设置恢复备份。 |
 
-Client configuration changes are explicit. Backups protect existing settings; restoration preserves unrelated changes where possible. Restart Claude Code after changing its connection. For CC Switch, select the configured provider in CC Switch.
+修改客户端配置需要主动操作，并会备份原设置；恢复时尽量保留无关修改。更改连接后重启 Claude Code。使用 CC Switch 时，在 CC Switch 中选择已配置的供应商。
 
-### OpenAI-compatible applications
+### 接入 OpenAI 兼容应用
 
 ```text
 Base URL   http://127.0.0.1:17863/v1
-API key    Copy from the desktop app
-Model      Use an ID returned by GET /v1/models
+API Key    从桌面应用复制
+Model      使用 GET /v1/models 返回的模型 ID
 ```
 
-The local API key authenticates your applications to the bridge. It is separate from your ChatGPT authorization and should not be shared.
+本地 API Key 用于应用连接桥接服务，与 ChatGPT 登录授权分开，请勿分享。
 
-| Endpoint | Use |
+| 接口 | 用途 |
 | --- | --- |
-| `GET /v1/models` | Discover available models. |
-| `POST /v1/chat/completions` | OpenAI Chat Completions, including streaming and tools. |
-| `POST /v1/responses` | OpenAI Responses. |
-| `POST /v1/messages` | Anthropic Messages for Claude Code. |
+| `GET /v1/models` | 获取可用模型。 |
+| `POST /v1/chat/completions` | OpenAI Chat Completions，支持流式输出及工具调用。 |
+| `POST /v1/responses` | OpenAI Responses。 |
+| `POST /v1/messages` | Claude Code 使用的 Anthropic Messages。 |
 
-All endpoints use the same local service and credentials. The default address is loopback-only. The old separate gateway port `17864` is no longer the default.
+这些接口共用一个本地服务和一套凭据。默认只监听本机地址；旧版网关的 `17864` 不再是默认端口。
 
-## Upgrade and troubleshoot
+## 升级与排查
 
-Quit the old Bridge/Gateway manager and stop its service before opening the desktop app. Existing data stays in place: the app reuses `%LOCALAPPDATA%\ChatGPTClaudeBridge` first, then `%LOCALAPPDATA%\ChatGPTGateway` if no Bridge directory exists. A fresh installation uses `%LOCALAPPDATA%\ChatGPTBridge`. When both legacy directories exist, Bridge takes precedence; credentials are not merged or copied.
+升级前先退出旧版 Bridge/Gateway 管理器并停止旧服务。已有数据保留原位置：优先沿用 `%LOCALAPPDATA%\ChatGPTClaudeBridge`；不存在时沿用 `%LOCALAPPDATA%\ChatGPTGateway`；全新安装使用 `%LOCALAPPDATA%\ChatGPTBridge`。两个旧目录都存在时优先使用 Bridge，不合并或复制凭据。
 
-If Claude Code reports `ECONNREFUSED`, check the address in the error. CC Switch may point Claude Code at `127.0.0.1:15721`; that proxy can be offline even while Codex-Anywhere on `17863` is healthy. Start CC Switch and its proxy, or explicitly choose direct Claude Code configuration in the desktop app.
+Claude Code 出现 `ECONNREFUSED` 时，先看报错中的地址。CC Switch 可能让 Claude Code 连接 `127.0.0.1:15721`；即使 Bridge 的 `17863` 服务正常，这个代理也可能没有启动。打开 CC Switch 并启动代理，或在桌面应用中主动选择“配置 Claude Code”使用直连。
 
-In **Settings**, save the proxy before clicking **检测连接** (Check connection). This checks the saved proxy, authorization/API connectivity, and Claude Code's current local route. It does not send a model prompt or display credentials.
+在“设置”中先保存代理，再点击“检测连接”。检测会检查已保存的代理、授权/API 连通性以及 Claude Code 当前使用的本地地址，不发送模型提示词，也不显示凭据。
 
-## What to know
+## 使用范围
 
-- **Account access:** your subscription determines models, quota, and upstream limits. The app cannot grant additional access. Model names and availability may change.
-- **Reasoning effort:** explicit supported levels pass through to the upstream model. Unsupported levels return an error. Equal level names do not imply equal compute across models.
-- **Context windows:** a client's `[1M]` setting does not increase the server's context limit. Token counts and client cost displays are estimates.
-- **Platform:** the desktop release targets Windows x64. Other architectures and operating systems are not published desktop targets in this release.
-- **Privacy:** authorization stays local; never include credentials, local API keys, or personal prompts in issues. Client settings and credentials are not part of the release package.
-- **Validation:** [VALIDATION.md](docs/VALIDATION.md) and [reports/](docs/reports/) contain historical protocol results. They are not proof that every desktop flow or every current account model has been tested live.
+- **账号权限：** 模型、额度和服务端限制取决于你的订阅；软件不会增加权限。可用模型可能变化。
+- **推理强度：** 显式指定的受支持等级原样传给上游；不支持的等级返回错误。同名等级不代表各模型使用相同算力。
+- **上下文：** 客户端的 `[1M]` 设置不会增加服务端限制。Token 统计和客户端费用显示属于估算。
+- **平台：** 当前桌面 Release 面向 Windows x64，不发布其他架构或操作系统的桌面版本。
+- **隐私：** 授权保存在本机。Issue 中不要上传凭据、API Key 或私人提示词；安装包不包含个人配置。
+- **验证：** [VALIDATION.md](docs/VALIDATION.md) 和 [reports/](docs/reports/) 保留历史协议测试记录，不代表所有桌面操作或当前账号模型都已完成在线验证。
 
 > [!IMPORTANT]
-> For personal, noncommercial experimentation. The bundled OpenAI Devkit has a noncommercial license. This is an independent project, not an official OpenAI, Anthropic, or CC Switch product.
+> 仅供个人、非商业实验。内置 OpenAI Devkit 使用非商业许可。本项目并非 OpenAI、Anthropic 或 CC Switch 官方产品。
 
-## Development
+## 开发
 
-Use Windows, Node.js 24, and PowerShell:
+环境：Windows、Node.js 24、PowerShell。
 
-Source lives in `src/core/` (API and integrations) and `src/desktop/` (Electron). Build helpers are in `scripts/`, tests in `tests/`, and guides and historical reports in `docs/`.
+`src/core/` 存放接口与接入逻辑，`src/desktop/` 存放 Electron 桌面代码；构建辅助脚本位于 `scripts/`，测试位于 `tests/`，指南和历史报告位于 `docs/`。
 
 ```powershell
 npm ci
@@ -103,12 +103,12 @@ npm start
 ```
 
 ```powershell
-npm test                 # Offline backend regression tests
-npm run test:desktop     # Desktop UI tests
-npm run dist             # Build the Windows desktop installer
+npm test                 # 后端离线回归
+npm run test:desktop     # 桌面界面测试
+npm run dist             # 构建 Windows 桌面安装包
 ```
 
-The installer is named `Codex-Anywhere-Setup-2.0.0-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
+安装包名称为 `Codex-Anywhere-Setup-1.0.0-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development and test isolation. Preserve [third-party notices](docs/THIRD-PARTY-NOTICES.md), the [project license](LICENSE), and the [OpenAI Devkit license](vendor/siwc/LICENSE).
+开发约定和测试隔离见 [CONTRIBUTING.md](docs/CONTRIBUTING.md)。请保留[第三方声明](docs/THIRD-PARTY-NOTICES.md)、[项目许可](LICENSE)及 [OpenAI Devkit 许可](vendor/siwc/LICENSE)。
 
