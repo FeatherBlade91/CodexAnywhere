@@ -52,6 +52,8 @@ Claude Code and CC Switch are optional, separately installed clients. You do not
 
 Client configuration changes are explicit. Backups protect existing settings; restoration preserves unrelated changes where possible. Restart Claude Code after changing its connection. For CC Switch, select the configured provider in CC Switch.
 
+The desktop app supports Simplified Chinese, Traditional Chinese, and English. On first launch it uses your preferred system language, falling back to English for other languages. Change it under **Settings → Display language**, or select **System default**. Confirming saves the choice and automatically restarts the app; canceling keeps the previous setting. Restarting stops the local service and interrupts active requests.
+
 ### OpenAI-compatible applications
 
 ```text
@@ -77,7 +79,7 @@ Quit the old Bridge/Gateway manager and stop its service before opening the desk
 
 If Claude Code reports `ECONNREFUSED`, check the address in the error. CC Switch may point Claude Code at `127.0.0.1:15721`; that proxy can be offline even while Codex-Anywhere on `17863` is healthy. Start CC Switch and its proxy, or explicitly choose direct Claude Code configuration in the desktop app.
 
-In **Settings**, save the proxy before clicking **检测连接** (Check connection). This checks the saved proxy, authorization/API connectivity, and Claude Code's current local route. It does not send a model prompt or display credentials.
+In **Settings**, save the proxy before clicking **Test connection**. This checks the saved proxy, authorization/API connectivity, and Claude Code's current local route. It does not send a model prompt or display credentials.
 
 ## What to know
 

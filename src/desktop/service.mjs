@@ -1,3 +1,4 @@
+import { t } from './localize.mjs';
 ﻿import { client, config, saveConfig, stateDir, applyProxy } from '../core/runtime.mjs';
 import { models, clearModels } from '../core/catalog.mjs';
 import { createBridgeServer } from '../core/server.mjs';
@@ -37,7 +38,7 @@ export function createDesktopService(dependencies = {}) {
         const next = createServer();
         await new Promise((resolve, reject) => {
           next.once('error', error => {
-            const failure = new Error(error.code === 'EADDRINUSE' ? `端口 ${settings.port} 已被占用，请关闭旧版 Bridge 或 Gateway 后重试。` : `无法启动本地服务（${error.code || '未知错误'}）。`);
+            const failure = new Error(error.code === 'EADDRINUSE' ? t('端口 {port} 已被占用，请关闭旧版 Bridge 或 Gateway 后重试。', { port: settings.port }) : t('无法启动本地服务（{code}）。', { code: error.code || t('未知错误') }));
             failure.code = error.code; reject(failure);
           });
           next.listen(settings.port, '127.0.0.1', () => { next.removeListener('error', reject); resolve(); });
@@ -54,7 +55,7 @@ export function createDesktopService(dependencies = {}) {
     else if (method === 'selectModel') {
       const slug = typeof args === 'string' ? args : args.model || args.slug;
       const available = await discover();
-      if (!available.some(model => model.slug === slug)) throw new Error('此模型暂不可用，请刷新模型后重新选择。');
+      if (!available.some(model => model.slug === slug)) throw new Error(t('此模型暂不可用，请刷新模型后重新选择。'));
       const previous = settings.model;
       settings.model = slug;
       try {
@@ -66,7 +67,7 @@ export function createDesktopService(dependencies = {}) {
       } catch (error) { settings.model = previous; await persist(); throw error; }
     } else if (method === 'integrate') {
       const mode = typeof args === 'string' ? args : args.mode;
-      if (!['direct', 'cc-switch'].includes(mode)) throw new Error('请选择 Claude Code 直连或 CC Switch。');
+      if (!['direct', 'cc-switch'].includes(mode)) throw new Error(t('请选择 Claude Code 直连或 CC Switch。'));
       const available = await discover();
       const integration = dependencies.integration || await import('../core/integration.mjs');
       const previous = settings.integration;
@@ -82,12 +83,12 @@ export function createDesktopService(dependencies = {}) {
     } else if (method === 'setProxy') {
       const proxy = (typeof args === 'string' ? args : args.proxy || '').trim();
       if (proxy) {
-        let url; try { url = new URL(proxy); } catch { throw new Error('请输入有效的 HTTP 或 HTTPS 代理地址。'); }
-        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('代理地址必须以 http:// 或 https:// 开头。');
+        let url; try { url = new URL(proxy); } catch { throw new Error(t('请输入有效的 HTTP 或 HTTPS 代理地址。')); }
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error(t('代理地址必须以 http:// 或 https:// 开头。'));
       }
       (dependencies.applyProxy || applyProxy)(proxy);
       settings.proxy = proxy; await persist();
-    } else throw new Error('未知桌面操作。');
+    } else throw new Error(t('未知桌面操作。'));
     return status();
   }
   return {
@@ -100,7 +101,7 @@ export function createDesktopService(dependencies = {}) {
           loginController = new AbortController();
           const signal = loginController.signal;
           signingIn = queue.then(() => { signal.throwIfAborted(); return auth.signIn({ signal }); }).then(session => {
-          if (!session.sharing) throw new Error('请允许共享 ChatGPT 订阅用量以完成连接。');
+          if (!session.sharing) throw new Error(t('请允许共享 ChatGPT 订阅用量以完成连接。'));
           }).then(() => { catalog = []; (dependencies.clearModels || clearModels)(); }).finally(() => { signingIn = undefined; loginController = undefined; });
           queue = signingIn.catch(() => {});
         }

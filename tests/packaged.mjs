@@ -17,7 +17,7 @@ for (const entry of listPackage(archive)) {
 const manifest = JSON.parse(extractFile(archive, 'package.json'));
 assert.equal(manifest.main, 'src/desktop/main.mjs');
 assert.equal(manifest.version, JSON.parse(await readFile('package.json', 'utf8')).version);
-for (const name of ['src/desktop/main.mjs', 'src/desktop/worker.mjs', 'src/desktop/service.mjs', 'src/desktop/network.mjs', 'src/desktop/preload.cjs', 'src/desktop/renderer/index.html', 'src/desktop/renderer/app.js', 'src/desktop/renderer/styles.css', 'src/core/runtime.mjs', 'src/core/server.mjs', 'src/core/catalog.mjs', 'src/core/integration.mjs']) {
+for (const name of ['src/desktop/language.mjs', 'src/desktop/localize.mjs', 'src/desktop/renderer/i18n.js', 'src/desktop/renderer/translations.js', 'src/desktop/main.mjs', 'src/desktop/worker.mjs', 'src/desktop/service.mjs', 'src/desktop/network.mjs', 'src/desktop/preload.cjs', 'src/desktop/renderer/index.html', 'src/desktop/renderer/app.js', 'src/desktop/renderer/styles.css', 'src/core/runtime.mjs', 'src/core/server.mjs', 'src/core/catalog.mjs', 'src/core/integration.mjs']) {
   assert(extractFile(archive, normalize(name)).equals(await readFile(name)), `Packaged file differs from source: ${name}`);
 }
 await access(join(directory, 'LICENSE.electron.txt'));
@@ -34,7 +34,7 @@ async function dpapi(operation, input) {
 const fixture = Buffer.from('desktop-package-test-only');
 assert((await dpapi('decrypt', await dpapi('encrypt', fixture))).equals(fixture));
 console.log('Packaged sources, licenses and Windows credential encryption verified.');
-const child = spawn(process.execPath, ['--test', 'tests/desktop.e2e.mjs'], {
+const child = spawn(process.execPath, ['--test', '--test-concurrency=1', 'tests/desktop.e2e.mjs', 'tests/language.e2e.mjs', 'tests/language-restart.e2e.mjs'], {
   stdio: 'inherit', windowsHide: true,
   env: { ...process.env, BRIDGE_TEST_EXE: join(directory, 'Codex-Anywhere.exe') },
 });

@@ -14,8 +14,10 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
   await new Promise(r => probe.close(r));
   await writeFile(join(dir, 'bridge.json'), JSON.stringify({ port, localKey: 'isolated-desktop-test-key', proxy: '', model: 'test-model' }));
   const env = { ...process.env, CHATGPT_BRIDGE_STATE_DIR: dir };
+  await writeFile(join(dir, 'desktop-settings.json'), JSON.stringify({ language: 'zh-CN' }));
   delete env.ELECTRON_RUN_AS_NODE;
   const options = process.env.BRIDGE_TEST_EXE ? { executablePath: resolve(process.env.BRIDGE_TEST_EXE), args: [] } : { args: [resolve('.')] };
+  options.args.push(`--user-data-dir=${join(dir, 'electron-profile')}`);
   const desktop = await electron.launch({ ...options, env });
   let closed = false;
   try {
