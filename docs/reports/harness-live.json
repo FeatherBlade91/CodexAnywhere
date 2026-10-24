@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-24",
+  "client": "Installed DeepSeek Harness dsh headless CLI",
+  "provider": "codex-anywhere",
+  "protocol": "openai-completions",
+  "baseURL": "http://127.0.0.1:17863/v1",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "low",
+  "expected": "CODEX_ANYWHERE_HARNESS_OK",
+  "actual": "CODEX_ANYWHERE_HARNESS_OK",
+  "exitCode": 0,
+  "pythonExample": { "sdk": "openai", "model": "gpt-6.1-sol", "reasoning_effort": "low", "actual": "PYTHON_CHAT_OK", "exitCode": 0 },
+  "modelDiscovery": { "status": 200, "modelCount": 7 },
+  "persistentConfiguration": {
+    "providerAndModel": "~/.dsh/settings.yaml: llm-pi-ai.providers.codex-anywhere",
+    "credentialReference": "CODEX_ANYWHERE_API_KEY",
+    "credentialStored": true,
+    "existingDefaultSelectionChanged": false,
+    "existingCredentialsPreserved": true
+  },
+  "compatibility": "The existing desktop credential document uses version/refs/records, while the installed npm CLI expects a flat mapping. The original structure and other credentials were retained, the new key was added under refs, and a separate user-local .credentials-cli.yaml was used by the CLI overlay. The overlay only selects the test model/effort and credential document; the provider and model come from persistent shared settings.",
+  "mappingEvidence": "Installed pi-ai openai-completions dispatch uses model.thinkingLevelMap[options.reasoningEffort] or the effort itself as reasoning_effort. Bridge chatPayload maps that value unchanged to reasoning.effort.",
+  "scope": "One real model/effort chat through the installed harness. Other models and effort values were not live-tested by this run. No credentials are included in this report."
+}

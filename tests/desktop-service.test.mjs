@@ -61,10 +61,31 @@ test('sign-in queued behind a mutation can be cancelled before opening browser',
   const cancelled=service.invoke('cancelLogin'); release(); await discovery; await cancelled; await failure;
   assert.equal(logins,0);
 });
-test('port conflicts provide actionable error and preserve stopped status', async t=>{
+test('port conflict selects and persists a reachable port and refreshes integration', async t=>{
   const occupied=createServer(); await new Promise(resolve=>occupied.listen(0,'127.0.0.1',resolve));
   t.after(()=>new Promise(resolve=>occupied.close(resolve)));
-  const service=createDesktopService({config:{port:occupied.address().port,localKey:'test'},client:{getSession:async()=>({status:'disconnected'})},createServer:()=>createServer()});
-  await assert.rejects(service.invoke('start'),error=>error.code==='EADDRINUSE' && error.message.includes('端口'));
-  assert.equal((await service.invoke('status')).running,false);
+  const previous=occupied.address().port, config={port:previous,localKey:'test',integration:'direct'};
+  let saved, updated;
+  const service=createDesktopService({config,client:{getSession:async()=>({status:'disconnected'}),cancelSignIn(){}},
+    saveConfig:async()=>{saved=config.port},integration:{updatePort:async old=>{updated=[old,config.port]}},
+    createServer:()=>createServer((req,res)=>res.end('ok'))});
+  t.after(()=>service.invoke('stop'));
+  const result=await service.invoke('start');
+  assert.notEqual(result.port,previous); assert.equal(saved,result.port);
+  assert.deepEqual(updated,[previous,result.port]);
+  assert.equal(await (await fetch(result.baseURL)).text(),'ok');
+  await service.invoke('stop'); assert.equal((await service.invoke('start')).port,result.port);
+});
+
+test('failed port synchronization closes listener and restores saved port', async t=>{
+  const occupied=createServer(); await new Promise(resolve=>occupied.listen(0,'127.0.0.1',resolve));
+  t.after(()=>new Promise(resolve=>occupied.close(resolve)));
+  const previous=occupied.address().port, config={port:previous,integration:'direct'};
+  let allocated;
+  const service=createDesktopService({config,client:{getSession:async()=>({status:'disconnected'})},saveConfig:async()=>{},
+    integration:{updatePort:async()=>{allocated=config.port;throw Error('Cannot update client')}},createServer:()=>createServer()});
+  await assert.rejects(service.invoke('start'),/Cannot update client/);
+  assert.equal(config.port,previous); assert.equal((await service.invoke('status')).running,false);
+  const probe=createServer(); await new Promise((resolve,reject)=>probe.once('error',reject).listen(allocated,'127.0.0.1',resolve));
+  await new Promise(resolve=>probe.close(resolve));
 });

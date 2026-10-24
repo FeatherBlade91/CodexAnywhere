@@ -24,6 +24,7 @@ function render() {
   $('launch-at-login').checked = Boolean(state.launchAtLogin); $('state-dir').textContent = state.stateDir || ''; $('version').textContent = state.version ? t('版本 {version}', { version: state.version }) : t('桌面版');
   if (Array.isArray(state.models)) availableModels = state.models;
   renderModels();
+  renderExample();
 }
 function renderModels() {
   const signature = JSON.stringify([availableModels, state.model, busy, isLoggedIn()]);
@@ -80,3 +81,23 @@ $('language').addEventListener('change', async () => {
     $('language').disabled = false;
   }
 });
+
+function renderExample() {
+  const model = availableModels.find(m => (m.slug || m.id) === state.model) || availableModels[0];
+  const slug = model?.slug || model?.id || state.model || 'gpt-6.1-sol';
+  const effort = model?.efforts?.includes('high') ? 'high' : model?.efforts?.[0] || 'high';
+  $('example-model').value = slug;
+  $('example-efforts').textContent = model?.efforts?.length ? t('{model} 当前目录支持：{efforts}。', { model: slug, efforts: model.efforts.join(', ') }) : t('登录并刷新模型后，这里显示示例模型支持的强度。');
+  $('python-example').textContent = `from openai import OpenAI
+
+client = OpenAI(
+    base_url=${JSON.stringify(state.baseURL || 'http://127.0.0.1:17863/v1')},
+    api_key=${JSON.stringify(t('粘贴上方本地 API 密钥'))},
+)
+reply = client.chat.completions.create(
+    model=${JSON.stringify(slug)},
+    messages=[{"role": "user", "content": "Hello"}],
+    reasoning_effort=${JSON.stringify(effort)},
+)
+print(reply.choices[0].message.content)`;
+}

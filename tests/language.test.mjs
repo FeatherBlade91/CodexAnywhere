@@ -46,4 +46,9 @@ test('translations preserve placeholders and cover desktop source strings', asyn
   }
   assert.equal(translator('en')('服务运行中 · {port}', { port: 17863 }), 'Service running · 17863');
   assert.equal(translator('en')('upstream diagnostic'), 'upstream diagnostic');
+  const html = await readFile(new URL('../src/desktop/renderer/index.html', import.meta.url), 'utf8');
+  for (const match of html.matchAll(/>([^<>]+)</g)) {
+    const source = match[1].trim();
+    if (/[\u4e00-\u9fff]/.test(source) && !['简体中文', '繁體中文'].includes(source)) assert.ok(translations[source], `Untranslated markup: ${source}`);
+  }
 });

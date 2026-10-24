@@ -44,6 +44,47 @@ export async function configure(mode) {
   if(mode==='cc-switch' && !existsSync(join(await ccDirectory(),'cc-switch.db'))) throw new Error('Start CC Switch once to initialize its configuration, then retry.');
   config.integration=mode; config.installDir=root; await saveConfig();
 }
+export async function updatePort(previousPort) {
+  const before = `http://127.0.0.1:${previousPort}`;
+  const after = `http://127.0.0.1:${config.port}`;
+  const { directory, live, existing } = await snapshot();
+  if (config.integration === 'direct') {
+    if (existing.env?.ANTHROPIC_BASE_URL !== before || existing.env?.ANTHROPIC_AUTH_TOKEN !== config.localKey) return;
+    const restorePath = join(stateDir, 'direct-restore.json');
+    const restore = await readJson(restorePath, null);
+    existing.env.ANTHROPIC_BASE_URL = after;
+    if (restore?.applied?.env?.ANTHROPIC_BASE_URL === before) {
+      restore.applied.env.ANTHROPIC_BASE_URL = after;
+      await writeFile(restorePath, JSON.stringify(restore, null, 2));
+    }
+    try { await writeFile(live, JSON.stringify(existing, null, 2)); }
+    catch (error) {
+      if (restore?.applied?.env?.ANTHROPIC_BASE_URL === after) {
+        restore.applied.env.ANTHROPIC_BASE_URL = before;
+        await writeFile(restorePath, JSON.stringify(restore, null, 2));
+      }
+      throw error;
+    }
+  } else if (config.integration === 'cc-switch') {
+    const dbPath = join(await ccDirectory(), 'cc-switch.db');
+    if (!existsSync(dbPath)) throw new Error('CC Switch database was not found.');
+    const db = new DatabaseSync(dbPath);
+    try {
+      db.exec('PRAGMA busy_timeout=15000');
+      await backup(db, join(directory, 'cc-switch.db'));
+      db.exec('BEGIN IMMEDIATE');
+      const rows = db.prepare("SELECT id,settings_config FROM providers WHERE app_type='claude' AND json_extract(meta,'$.chatgptPlanBridge')=1").all();
+      for (const row of rows) {
+        const settings = JSON.parse(row.settings_config);
+        if (settings.env?.ANTHROPIC_BASE_URL !== before || settings.env?.ANTHROPIC_AUTH_TOKEN !== config.localKey) continue;
+        settings.env.ANTHROPIC_BASE_URL = after;
+        db.prepare("UPDATE providers SET settings_config=? WHERE id=? AND app_type='claude'").run(JSON.stringify(settings), row.id);
+      }
+      db.exec('COMMIT');
+    } catch (error) { try { db.exec('ROLLBACK'); } catch {} throw error; }
+    finally { db.close(); }
+  }
+}
 export async function syncModels(catalog) {
   if (!catalog.length) throw new Error('No available models to register.');
   const {directory,live,existing}=await snapshot();

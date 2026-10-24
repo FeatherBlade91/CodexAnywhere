@@ -39,6 +39,8 @@ flowchart RL
 
 Claude Code and CC Switch are optional, separately installed clients. You do not need either for OpenAI-compatible applications.
 
+Closing the window hides the app to the system tray and keeps the local service running. Click the tray icon or reopen the app to restore the window. To stop the service and quit, right-click the tray icon and choose “退出” (Exit).
+
 ## One place for every connection
 
 | You want to… | In Codex-Anywhere |
@@ -110,7 +112,11 @@ npm run test:desktop     # Desktop UI tests
 npm run dist             # Build the Windows desktop installer
 ```
 
-The installer is named `Codex-Anywhere-Setup-1.0.0-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
+The installer is named `Codex-Anywhere-Setup-1.0.1-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and test isolation. Preserve [third-party notices](THIRD-PARTY-NOTICES.md), the [project license](../LICENSE), and the [OpenAI Devkit license](../vendor/siwc/LICENSE).
 
+
+### OpenAI examples
+
+The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](OPENAI-EXAMPLES.md).

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, clipboard, shell, utilityProcess, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, clipboard, shell, utilityProcess, dialog, Tray, Menu } from 'electron';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { existsSync } from 'node:fs';
@@ -7,7 +7,7 @@ import { translator } from './renderer/i18n.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const page = pathToFileURL(join(here, 'renderer/index.html')).href;
-let window, worker, quitting = false, workerError;
+let window, worker, tray, quitting = false, workerError;
 let locale, languagePath, restarting = false;
 let t = translator('en');
 let sequence = 0;
@@ -58,6 +58,26 @@ function startWorker() {
   });
 }
 
+function showWindow() {
+  if (quitting || !app.isReady()) return;
+  if (!window || window.isDestroyed()) createWindow();
+  if (window.isMinimized()) window.restore();
+  window.show();
+  window.focus();
+}
+
+function createTray() {
+  tray = new Tray(join(here, 'assets/icon.ico'));
+  tray.setToolTip(t('Codex-Anywhere — 后台运行'));
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: t('打开 Codex-Anywhere'), click: showWindow },
+    { type: 'separator' },
+    { label: t('退出'), click: () => app.quit() },
+  ]));
+  tray.on('click', showWindow);
+  tray.on('double-click', showWindow);
+}
+
 function createWindow() {
   window = new BrowserWindow({
     title: 'Codex-Anywhere', width: 1120, height: 800, minWidth: 800, minHeight: 640, icon: join(here, 'assets/icon.png'),
@@ -66,12 +86,19 @@ function createWindow() {
   });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   window.webContents.on('will-navigate', (event, url) => { if (url !== page) event.preventDefault(); });
+  window.on('close', event => {
+    if (quitting || !tray || tray.isDestroyed()) return;
+    event.preventDefault();
+    window.hide();
+  });
+  window.on('closed', () => { window = undefined; });
   window.loadURL(page);
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on('second-instance', () => { if (window) { if (window.isMinimized()) window.restore(); window.show(); window.focus(); } });
+  app.on('second-instance', showWindow);
+  app.on('activate', showWindow);
   app.whenReady().then(async () => {
     languagePath = join(process.env.CHATGPT_BRIDGE_STATE_DIR || app.getPath('userData'), 'desktop-settings.json');
     locale = await loadLanguage(languagePath, app.getPreferredSystemLanguages());
@@ -109,12 +136,15 @@ else {
       if (method === 'status') return { ...result, version: app.getVersion(), launchAtLogin: app.isPackaged && app.getLoginItemSettings().openAtLogin };
       return result;
     });
+    createTray();
     createWindow();
   }).catch(error => { dialog.showErrorBox(t('无法启动 Codex-Anywhere'), error.message); app.exit(1); });
   app.on('window-all-closed', () => app.quit());
   app.on('before-quit', event => {
-    if (quitting || !worker) return;
-    event.preventDefault(); quitting = true;
+    if (quitting) return;
+    quitting = true;
+    if (!worker) return;
+    event.preventDefault();
     const timeout = setTimeout(() => { worker?.kill(); app.exit(0); }, 6000);
     request('cancelLogin').catch(() => {});
     request('stop').catch(() => {}).finally(() => { clearTimeout(timeout); worker?.kill(); app.exit(0); });

@@ -39,6 +39,8 @@ flowchart RL
 
 Claude Code 和 CC Switch 是可选客户端，需要单独安装。使用 OpenAI 兼容应用时不需要它们。
 
+点击窗口叉子会隐藏到系统托盘，本地服务继续运行。点击托盘图标或重新打开软件可恢复窗口；彻底退出请右键托盘图标，选择“退出”。
+
 ## 一个窗口管理连接
 
 | 想做什么 | 在 Codex-Anywhere 中操作 |
@@ -110,7 +112,11 @@ npm run test:desktop     # 桌面界面测试
 npm run dist             # 构建 Windows 桌面安装包
 ```
 
-安装包名称为 `Codex-Anywhere-Setup-1.0.0-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
+安装包名称为 `Codex-Anywhere-Setup-1.0.1-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
 
 开发约定和测试隔离见 [CONTRIBUTING.md](docs/CONTRIBUTING.md)。请保留[第三方声明](docs/THIRD-PARTY-NOTICES.md)、[项目许可](LICENSE)及 [OpenAI Devkit 许可](vendor/siwc/LICENSE)。
 
+
+### OpenAI examples
+
+The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](docs/OPENAI-EXAMPLES.md).

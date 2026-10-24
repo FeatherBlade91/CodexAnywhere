@@ -63,8 +63,12 @@ test('confirmed language change actually relaunches the app and stops its servic
   } finally {
     if (browser) {
       const session = await browser.newBrowserCDPSession();
+      const { processInfo } = await session.send('SystemInfo.getProcessInfo');
+      const browserPid = processInfo.find(item => item.type === 'browser')?.id;
       await Promise.race([session.send('Browser.close').catch(() => {}), delay(3000)]);
       await browser.close();
+      // Closing a window now hides the app in the tray. Stop only this test instance.
+      if (browserPid) { try { process.kill(browserPid); } catch (error) { if (error.code !== 'ESRCH') throw error; } }
     }
     if (child.exitCode === null) child.kill();
     // Chromium may still be releasing its profile after closing the last window.

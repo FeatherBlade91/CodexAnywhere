@@ -36,13 +36,33 @@ export function createDesktopService(dependencies = {}) {
     if (method === 'start') {
       if (!server?.listening) {
         const next = createServer();
-        await new Promise((resolve, reject) => {
-          next.once('error', error => {
-            const failure = new Error(error.code === 'EADDRINUSE' ? t('端口 {port} 已被占用，请关闭旧版 Bridge 或 Gateway 后重试。', { port: settings.port }) : t('无法启动本地服务（{code}）。', { code: error.code || t('未知错误') }));
-            failure.code = error.code; reject(failure);
-          });
-          next.listen(settings.port, '127.0.0.1', () => { next.removeListener('error', reject); resolve(); });
+        const listen = port => new Promise((resolve, reject) => {
+          const failed = error => { next.removeListener('listening', ready); reject(error); };
+          const ready = () => { next.removeListener('error', failed); resolve(); };
+          next.once('error', failed); next.once('listening', ready);
+          next.listen(port, '127.0.0.1');
         });
+        try { await listen(settings.port); }
+        catch (error) {
+          if (error.code !== 'EADDRINUSE') throw error;
+          await listen(0);
+        }
+        const previousPort = settings.port;
+        settings.port = next.address().port;
+        try {
+          if (settings.port !== previousPort) {
+            await persist();
+            if (settings.integration) {
+              const integration = dependencies.integration || await import('../core/integration.mjs');
+              await integration.updatePort(previousPort);
+            }
+          }
+        } catch (error) {
+          await new Promise(resolve => next.close(resolve));
+          settings.port = previousPort;
+          await persist();
+          throw error;
+        }
         server = next;
       }
     } else if (method === 'stop') await stop();
