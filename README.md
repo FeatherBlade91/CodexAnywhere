@@ -2,9 +2,9 @@
 
 # ChatGPT Bridge
 
-**Your ChatGPT account. Your tools. One desktop app.**
+[简体中文](docs/README.zh-CN.md) · [繁體中文](docs/README.zh-TW.md) · [English](README.md)
 
-[English](README.md) · [简体中文](docs/README.zh-CN.md) · [繁體中文](docs/README.zh-TW.md)
+**Use your ChatGPT subscription through a local API key.**
 
 [Download for Windows](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest) · [Usage guide](docs/USER-GUIDE.txt) · [Contributing](docs/CONTRIBUTING.md)
 
@@ -19,6 +19,10 @@
 *Actual Electron window before sign-in, captured with isolated test data and a masked key. The temporary test port shown differs from the default `17863`.*
 
 ChatGPT Bridge brings the former **Plan Bridge** and **API Gateway** together in one standalone Electron application. Sign in once, start one local service, and connect Claude Code or applications that accept an OpenAI-compatible API. Desktop installers are the only release format.
+
+The app uses OpenAI's Sign in with ChatGPT Devkit. Eligible accounts can authorize requests against their ChatGPT plan allowance through this [documented integration](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt). It does not reverse-proxy the ChatGPT website or reuse browser cookies. The bridge translates client requests locally; its API key secures that local service and is not an OpenAI platform API key.
+
+Use remains subject to account eligibility, plan limits, OpenAI's terms, and the Devkit's noncommercial license. This integration does not establish blanket compliance for every use or guarantee that an account cannot be suspended; OpenAI's [Terms of Use](https://openai.com/policies/terms-of-use/) still apply.
 
 ```mermaid
 flowchart LR

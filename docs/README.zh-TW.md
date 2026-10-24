@@ -2,9 +2,9 @@
 
 # ChatGPT Bridge
 
-**一個 ChatGPT 帳號，一個桌面應用程式，連接你常用的工具。**
+[简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [English](../README.md)
 
-[English](../README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
+**透過本機 API Key 使用 ChatGPT 訂閱額度。**
 
 [下載 Windows 桌面版](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest) · [使用指南](USER-GUIDE.txt) · [參與開發](CONTRIBUTING.md)
 
@@ -19,6 +19,10 @@
 *實際 Electron 未登入介面，使用隔離測試資料，金鑰已遮蔽。截圖為暫時測試連接埠，預設連接埠為 `17863`。*
 
 ChatGPT Bridge 將原來的 **Plan Bridge** 和 **API Gateway** 合併為獨立的 Electron 桌面軟體。登入一次，啟動一個本機服務，即可連接 Claude Code 或支援 OpenAI 相容介面的應用程式。Release 僅提供桌面安裝程式。
+
+軟體使用 OpenAI 的 Sign in with ChatGPT Devkit，透過[官方文件介紹的授權方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，讓符合條件的帳號使用自己的 ChatGPT 方案額度。它不反向代理 ChatGPT 網頁，也不重用瀏覽器 Cookie。本機服務負責轉換用戶端請求；產生的 API Key 用於存取這個本機服務，並非 OpenAI 平台 API Key。
+
+使用時仍須符合帳號資格、方案限制、OpenAI 條款和 Devkit 的非商業授權。採用官方授權方式不代表任何用途都完全合規，也不能保證零停權風險；具體使用須遵守 [OpenAI 使用條款](https://openai.com/policies/terms-of-use/)。
 
 ```mermaid
 flowchart LR
