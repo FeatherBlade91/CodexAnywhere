@@ -1,7 +1,7 @@
 name: Desktop release
 on:
   push:
-    tags: ['v2.*']
+    tags: ['v1.*']
   workflow_dispatch:
 permissions:
   contents: write

@@ -17,7 +17,7 @@
     "proper-lockfile": "^4.1.2",
     "undici": "^7.0.0"
   },
-  "version": "2.0.0",
+  "version": "1.0.0",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "electron": "^45.0.0",
