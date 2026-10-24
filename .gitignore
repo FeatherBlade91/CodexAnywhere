@@ -5,6 +5,10 @@ build/
 dist/
 .tools/
 test-results/
+playwright-report/
+coverage/
+release-artifacts/
+*.tsbuildinfo
 *.db
 *.db-*
 bridge.json

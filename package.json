@@ -1,22 +1,65 @@
 {
-    "name":  "chatgpt-plan-bridge",
-    "private":  true,
-    "type":  "module",
-    "scripts":  {
-                    "build":  "node build.mjs",
-                    "start":  "node server.mjs",
-                    "gateway":  "node gateway.mjs",
-                    "test:gateway":  "node --test tests/gateway.test.mjs",
-                    "build:gateway":  "powershell -NoProfile -ExecutionPolicy Bypass -File build-gateway.ps1",
-                    "test:gateway-installer":  "node tests/gateway-installer.mjs",
-                    "test":  "node --test test.mjs integration.test.mjs detect-cc.test.mjs restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs",
-                    "test:e2e":  "node e2e.mjs"
-                },
-    "dependencies":  {
-                         "jose":  "^6.1.0",
-                         "openai":  "^7.21.0",
-                         "proper-lockfile":  "^4.1.2",
-                         "undici":  "^7.0.0"
-                     },
-    "version":  "1.0.0"
+  "name": "chatgpt-bridge",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "pack": "npm run build && electron-builder --win --dir --x64 --publish never",
+    "test": "node --test tests/protocol.test.mjs tests/integration.test.mjs tests/restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs tests/gateway.test.mjs tests/desktop-service.test.mjs tests/network.test.mjs",
+    "test:desktop": "node --test tests/desktop.e2e.mjs",
+    "test:live": "node scripts/live/e2e.mjs"
+  },
+  "dependencies": {
+    "jose": "^6.1.0",
+    "openai": "^7.21.0",
+    "proper-lockfile": "^4.1.2",
+    "undici": "^7.0.0"
+  },
+  "version": "2.0.0",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0"
+  },
+  "productName": "ChatGPT Bridge",
+  "description": "One desktop app for ChatGPT subscription connections",
+  "author": "NamelessDDDoge",
+  "main": "src/desktop/main.mjs",
+  "build": {
+    "appId": "com.nameless.chatgptbridge",
+    "productName": "ChatGPT Bridge",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "src/core/dpapi.ps1"
+    ],
+    "files": [
+      "src/**/*",
+      "vendor/siwc/*.js",
+      "vendor/siwc/LICENSE",
+      "LICENSE",
+      "docs/THIRD-PARTY-NOTICES.md",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "ChatGPT-Bridge-Setup-${version}-${arch}.${ext}",
+      "icon": "src/desktop/assets/icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": null
+  }
 }

@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import OpenAI from 'openai';
-import { createGateway } from '../openai-server.mjs';
-import { chatPayload } from '../openai-protocol.mjs';
+import { createGateway } from '../src/core/openai-server.mjs';
+import { chatPayload } from '../src/core/openai-protocol.mjs';
 
 async function fixture(t, { tool = false, broken = false } = {}) {
   let logins = 0, requests = 0, payload;

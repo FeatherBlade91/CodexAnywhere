@@ -1,10 +1,10 @@
 // Exercise actual SIWC output events independently of the running bridge.
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
-import {client} from '../runtime.mjs';
-import {readSSE,toMessage,toResponses} from '../protocol.mjs';
+import {client} from '../src/core/runtime.mjs';
+import {readSSE,toMessage,toResponses} from '../src/core/protocol.mjs';
 import {apiError} from '../vendor/siwc/errors.js';
-import {ResponseAccumulator} from '../response-accumulator.mjs';
+import {ResponseAccumulator} from '../src/core/response-accumulator.mjs';
 const report={date:new Date().toISOString(),cases:[]};
 for(const mode of ['text','tool']){
   const result=await client.withAccessToken(async token=>{

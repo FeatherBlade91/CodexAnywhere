@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ResponseAccumulator} from '../response-accumulator.mjs';
-import {toMessage} from '../protocol.mjs';
+import {ResponseAccumulator} from '../src/core/response-accumulator.mjs';
+import {toMessage} from '../src/core/protocol.mjs';
 const usage={input_tokens:12,output_tokens:8,input_tokens_details:{cached_tokens:3}};
 const message={id:'m1',type:'message',role:'assistant',content:[{type:'output_text',text:'STACK_LUNA_OK'}]};
 const call={id:'fc1',type:'function_call',call_id:'call1',name:'Read',arguments:'{"path":"fixture.txt"}'};

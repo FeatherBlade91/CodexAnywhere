@@ -19,7 +19,7 @@ async function fixture(t){
   const port=await freePort(),localKey=randomBytes(32).toString('hex');
   await writeFile(join(state,'bridge.json'),JSON.stringify({port,localKey,proxy:'',model:'gpt-6.1-sol'}));
   const env={...process.env,CHATGPT_BRIDGE_STATE_DIR:state};
-  const child=spawn(process.execPath,[join(root,'server.mjs')],{cwd:root,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
+  const child=spawn(process.execPath,[join(root,'src/core/server.mjs')],{cwd:root,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
   let diagnostic='';child.stdout.on('data',d=>diagnostic+=d);child.stderr.on('data',d=>diagnostic+=d);
   const exited=new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',(code,signal)=>resolve({code,signal}))});
   t.after(()=>{if(child.exitCode===null&&child.signalCode===null)child.kill()});
@@ -40,23 +40,15 @@ async function expectExit(exited){
   finally{clearTimeout(timer)}
 }
 
-test('isolated lifecycle: shutdown rejects missing/wrong keys and authenticated shutdown drains naturally',{timeout:20000},async t=>{
-  const f=await fixture(t);
-  for(const headers of [{},{authorization:'Bearer wrong-key'}]){
-    const r=await fetch(f.base+'/admin/shutdown',{method:'POST',headers});
-    assert.equal(r.status,401);assert.equal((await r.json()).error.type,'authentication_error');
-    const health=await fetch(f.base+'/health');assert.equal(health.status,200);await health.text();
+test('standalone unified server authenticates both protocols and has no HTTP admin controls', {timeout:20000}, async t => {
+  const f = await fixture(t);
+  for (const path of ['/v1/messages', '/v1/chat/completions', '/v1/responses']) {
+    const response = await fetch(f.base + path, {method:'POST', body:'{}'});
+    assert.equal(response.status,401);
+    await response.text();
   }
-  const stopped=await fetch(f.base+'/admin/shutdown',{method:'POST',headers:{authorization:`Bearer ${f.localKey}`}});
-  assert.equal(stopped.status,202);assert.equal((await stopped.json()).status,'draining');
-  assert.deepEqual(await expectExit(f.exited),{code:0,signal:null});
-});
-
-test('stop.ps1 stops only the explicitly spawned isolated server gracefully',{timeout:30000,skip:process.platform!=='win32'},async t=>{
-  const f=await fixture(t);
-  const ps=spawn('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',join(root,'stop.ps1')],{cwd:root,env:f.env,windowsHide:true,stdio:['ignore','pipe','pipe']});
-  let output='';ps.stdout.on('data',d=>output+=d);ps.stderr.on('data',d=>output+=d);
-  t.after(()=>{if(ps.exitCode===null&&ps.signalCode===null)ps.kill()});
-  const status=await new Promise((resolve,reject)=>{ps.once('error',reject);ps.once('exit',resolve)});
-  assert.equal(status,0,output);assert.deepEqual(await expectExit(f.exited),{code:0,signal:null});
+  const response = await fetch(f.base + '/admin/shutdown', {method:'POST', headers:{authorization:`Bearer ${f.localKey}`}});
+  assert.equal(response.status,404); await response.text();
+  assert.equal((await fetch(f.base + '/health')).status,200);
+  f.child.kill(); await expectExit(f.exited);
 });

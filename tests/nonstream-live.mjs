@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
-import {config} from '../runtime.mjs';
+import {config} from '../src/core/runtime.mjs';
 import {Agent} from 'undici';
 const localDispatcher=new Agent();
 const report={date:new Date().toISOString(),cases:[]};

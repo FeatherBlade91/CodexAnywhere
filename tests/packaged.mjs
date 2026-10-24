@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { extractFile, listPackage, statFile } from '@electron/asar';
+import { createHash } from 'node:crypto';
+import { readFile, access } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { join, normalize, resolve } from 'node:path';
+
+const directory = resolve(process.env.BRIDGE_PACKAGE_DIR || 'dist/win-unpacked');
+const archive = join(directory, 'resources/app.asar');
+for (const entry of listPackage(archive)) {
+  const name = entry.replace(/^[\\/]/, '');
+  const metadata = statFile(archive, name);
+  if (metadata.integrity?.hash) {
+    assert.equal(createHash('sha256').update(extractFile(archive, name)).digest('hex'), metadata.integrity.hash, `Archive integrity failure: ${name}`);
+  }
+}
+const manifest = JSON.parse(extractFile(archive, 'package.json'));
+assert.equal(manifest.main, 'src/desktop/main.mjs');
+assert.equal(manifest.version, JSON.parse(await readFile('package.json', 'utf8')).version);
+for (const name of ['src/desktop/main.mjs', 'src/desktop/worker.mjs', 'src/desktop/service.mjs', 'src/desktop/network.mjs', 'src/desktop/preload.cjs', 'src/desktop/renderer/index.html', 'src/desktop/renderer/app.js', 'src/desktop/renderer/styles.css', 'src/core/runtime.mjs', 'src/core/server.mjs', 'src/core/catalog.mjs', 'src/core/integration.mjs']) {
+  assert(extractFile(archive, normalize(name)).equals(await readFile(name)), `Packaged file differs from source: ${name}`);
+}
+await access(join(directory, 'LICENSE.electron.txt'));
+await access(join(directory, 'LICENSES.chromium.html'));
+const script = join(directory, 'resources/app.asar.unpacked/src/core/dpapi.ps1');
+async function dpapi(operation, input) {
+  return new Promise((resolve, reject) => {
+    const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script, operation], { windowsHide: true });
+    let output = ''; child.stdout.on('data', data => output += data); child.stderr.resume();
+    child.once('error', reject); child.once('exit', code => code === 0 ? resolve(Buffer.from(output.trim(), 'base64')) : reject(new Error('Packaged credential encryption failed')));
+    child.stdin.end(input.toString('base64'));
+  });
+}
+const fixture = Buffer.from('desktop-package-test-only');
+assert((await dpapi('decrypt', await dpapi('encrypt', fixture))).equals(fixture));
+console.log('Packaged sources, licenses and Windows credential encryption verified.');
+const child = spawn(process.execPath, ['--test', 'tests/desktop.e2e.mjs'], {
+  stdio: 'inherit', windowsHide: true,
+  env: { ...process.env, BRIDGE_TEST_EXE: join(directory, 'ChatGPT Bridge.exe') },
+});
+child.once('error', error => { console.error(error); process.exitCode = 1; });
+child.once('exit', code => { process.exitCode = code ?? 1; });

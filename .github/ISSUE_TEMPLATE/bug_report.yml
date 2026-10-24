@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible problem. English, 简体中文, and 繁體中文 are welcome.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Include only sanitized details. Remove credentials, authorization headers, local keys, personal prompts, and account information from logs.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the actual result and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the smallest sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include bridge version, Windows version and architecture, Claude Code version, and CC Switch version if used.
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Connection mode
+      options:
+        - CC Switch
+        - Direct
+        - Installation or uninstallation
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or screenshots
+      description: For model issues, include the model ID and requested effort. Review attachments for private information.

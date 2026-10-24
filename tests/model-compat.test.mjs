@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {writeFile,readFile,mkdir} from 'node:fs/promises';
-import {client} from '../runtime.mjs';
-import {models,selectModel} from '../catalog.mjs';
-import {toResponses,resolveEffort} from '../protocol.mjs';
+import {client} from '../src/core/runtime.mjs';
+import {models,selectModel} from '../src/core/catalog.mjs';
+import {toResponses,resolveEffort} from '../src/core/protocol.mjs';
 
 test('live catalog suffix and effort compatibility; prior E2E coverage', async()=>{
   const raw=await client.withAccessToken(async(token,signal)=>{

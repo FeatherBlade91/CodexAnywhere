@@ -1,0 +1,54 @@
+﻿ChatGPT Bridge — 桌面版使用指南
+
+安装与登录
+1. 从项目最新 Release 下载 Windows x64 桌面安装包：
+   https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest
+2. 安装并打开 ChatGPT Bridge，在界面中登录 ChatGPT。
+3. 在浏览器中完成授权，返回应用刷新模型，启动服务。
+安装包自带运行环境。普通使用不需要 Node.js、Python 或命令行。
+
+连接 OpenAI 兼容应用
+Base URL 默认为 http://127.0.0.1:17863/v1。
+从桌面界面复制本地 API Key，通过 GET /v1/models 获取应用使用的模型 ID。
+支持 /v1/models、/v1/chat/completions、/v1/responses。
+本地 API Key 和 ChatGPT 登录授权不同，请勿上传或分享。
+
+连接 Claude Code
+需要另行安装 Claude Code。选择直连配置或 CC Switch 接入。
+直连会备份后修改相关连接和模型设置；应用配置后重启 Claude Code。
+CC Switch 需要另行安装并至少启动一次；配置完成后在 CC Switch 中选择供应商。
+恢复功能用于撤销本应用管理的设置，尽量保留其他修改。
+Anthropic Messages 使用同一服务的 /v1/messages，无须另启一个网关。
+
+日常使用
+在桌面界面中启动或停止服务、刷新模型、查看状态。
+设置代理后按界面提示保存；需要时重新启动服务。
+可在设置中启用 Windows 登录时启动。
+服务仅供本机使用，默认端口为 17863。
+旧版独立 Gateway 的 17864 地址需要在客户端中改为新地址。
+升级前先退出旧版管理器并停止旧服务，避免端口占用。
+已有数据保留原目录，优先沿用 %LOCALAPPDATA%\ChatGPTClaudeBridge，
+其次 %LOCALAPPDATA%\ChatGPTGateway；全新安装使用 %LOCALAPPDATA%\ChatGPTBridge。
+两个旧目录都存在时优先使用 Bridge，不合并或复制凭据。
+
+常见问题
+连接失败：确认本应用显示服务运行中，客户端地址及 API Key 正确。
+ECONNREFUSED：看清失败地址。CC Switch 的 127.0.0.1:15721 代理可能未启动，
+即使 Bridge 的 17863 服务正常也会失败。启动 CC Switch 及代理，或主动配置 Claude Code 直连。
+设置中先保存代理再点击“检测连接”，可检查代理、授权/API 和 Claude Code 当前本地路由。
+检测不会发送模型提示词或显示凭据。
+端口占用：关闭占用该端口的旧版桥接服务，再启动桌面版服务。
+授权失败：检查网络与代理设置，然后重新登录。
+模型不可用：刷新模型列表。模型权限和额度由 ChatGPT 账号决定。
+推理等级报错：选择该模型支持的等级；软件不会把不支持的等级静默降级。
+上下文超限：客户端 [1M] 标记不会提高服务端限制，请缩短输入或开启新会话。
+
+卸载
+如果需要撤销 Claude Code 或 CC Switch 配置，请先在应用内执行恢复。
+然后退出应用，通过 Windows 设置中的已安装应用卸载 ChatGPT Bridge。
+不要将卸载视为已恢复客户端配置或已删除个人授权数据。
+
+许可与反馈
+仅供个人、非商业实验。不是 OpenAI、Anthropic 或 CC Switch 官方产品。
+反馈时提供复现步骤与已脱敏日志，不要附带登录凭据、API Key 或私人提示词。
+历史协议测试范围见 VALIDATION.md；不代表所有桌面流程均已在线验证。

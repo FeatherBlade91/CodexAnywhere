@@ -1,0 +1,104 @@
+import { app, BrowserWindow, ipcMain, clipboard, shell, utilityProcess, dialog } from 'electron';
+import { join, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { existsSync } from 'node:fs';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const page = pathToFileURL(join(here, 'renderer/index.html')).href;
+let window, worker, quitting = false, workerError;
+let sequence = 0;
+const pending = new Map();
+const allowed = new Set(['status', 'start', 'stop', 'login', 'cancelLogin', 'logout', 'models', 'selectModel', 'integrate', 'restore', 'setProxy', 'testConnection']);
+
+function request(method, args) {
+  if (!worker || workerError) return Promise.reject(new Error(workerError || '服务尚未就绪，请重新打开应用。'));
+  return new Promise((resolve, reject) => {
+    const id = ++sequence;
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error('操作超时，请重试。')); }, method === 'login' ? 600_000 : 90_000);
+    pending.set(id, { resolve, reject, timer });
+    worker.postMessage({ id, method, args });
+  });
+}
+
+function startWorker() {
+  const local = process.env.LOCALAPPDATA || app.getPath('userData');
+  let stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR;
+  let appId = 'chatgpt-bridge';
+  let appName = 'ChatGPT Bridge';
+  if (!stateDir) {
+    if (existsSync(join(local, 'ChatGPTClaudeBridge', 'bridge.json'))) {
+      stateDir = join(local, 'ChatGPTClaudeBridge');
+      appId = 'chatgpt-claude-bridge'; appName = 'ChatGPT Claude Bridge';
+    } else if (existsSync(join(local, 'ChatGPTGateway', 'bridge.json'))) {
+      stateDir = join(local, 'ChatGPTGateway');
+      appId = 'chatgpt-api-gateway'; appName = 'ChatGPT API Gateway';
+    } else stateDir = join(local, 'ChatGPTBridge');
+  }
+  worker = utilityProcess.fork(join(here, 'worker.mjs'), [], {
+    serviceName: 'ChatGPT Bridge service', stdio: 'pipe',
+    env: { ...process.env, CHATGPT_BRIDGE_STATE_DIR: stateDir, CHATGPT_BRIDGE_APP_ID: appId, CHATGPT_BRIDGE_APP_NAME: appName },
+  });
+  // Never forward backend logs or credentials into the renderer console.
+  worker.stdout?.resume(); worker.stderr?.resume();
+  worker.on('message', message => {
+    const item = pending.get(message.id);
+    if (!item) return;
+    clearTimeout(item.timer); pending.delete(message.id);
+    if (message.error) item.reject(new Error(message.error)); else item.resolve(message.result);
+  });
+  worker.on('exit', () => {
+    workerError = '后台服务已退出，请重新打开应用。';
+    for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error(workerError)); }
+    pending.clear(); worker = undefined;
+  });
+}
+
+function createWindow() {
+  window = new BrowserWindow({
+    title: 'ChatGPT Bridge', width: 1120, height: 800, minWidth: 800, minHeight: 640, icon: join(here, 'assets/icon.png'),
+    backgroundColor: '#F3F6FA', autoHideMenuBar: true,
+    webPreferences: { preload: join(here, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true },
+  });
+  window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  window.webContents.on('will-navigate', (event, url) => { if (url !== page) event.preventDefault(); });
+  window.loadURL(page);
+}
+
+if (!app.requestSingleInstanceLock()) app.quit();
+else {
+  app.on('second-instance', () => { if (window) { if (window.isMinimized()) window.restore(); window.show(); window.focus(); } });
+  app.whenReady().then(() => {
+    startWorker();
+    ipcMain.handle('bridge:invoke', async (event, method, args) => {
+      if (event.sender !== window?.webContents || event.senderFrame !== window.webContents.mainFrame || event.senderFrame.url !== page) throw new Error('拒绝未知窗口的请求。');
+      if (method === 'copy') {
+        if (typeof args !== 'string' || args.length > 8192) throw new Error('无效的复制内容。');
+        clipboard.writeText(args); return true;
+      }
+      if (method === 'setLaunchAtLogin') {
+        if (typeof args !== 'boolean') throw new Error('无效的启动设置。');
+        if (!app.isPackaged) throw new Error('开机启动仅在安装版中可用。');
+        app.setLoginItemSettings({ openAtLogin: args }); return args;
+      }
+      if (method === 'openDataFolder') {
+        const state = await request('status');
+        const error = await shell.openPath(state.stateDir);
+        if (error) throw new Error(error);
+        return true;
+      }
+      if (!allowed.has(method)) throw new Error('未知操作。');
+      const result = await request(method, args);
+      if (method === 'status') return { ...result, version: app.getVersion(), launchAtLogin: app.isPackaged && app.getLoginItemSettings().openAtLogin };
+      return result;
+    });
+    createWindow();
+  }).catch(error => { dialog.showErrorBox('无法启动 ChatGPT Bridge', error.message); app.exit(1); });
+  app.on('window-all-closed', () => app.quit());
+  app.on('before-quit', event => {
+    if (quitting || !worker) return;
+    event.preventDefault(); quitting = true;
+    const timeout = setTimeout(() => { worker?.kill(); app.exit(0); }, 6000);
+    request('cancelLogin').catch(() => {});
+    request('stop').catch(() => {}).finally(() => { clearTimeout(timeout); worker?.kill(); app.exit(0); });
+  });
+}

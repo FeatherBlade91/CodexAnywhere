@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest a change. English, 简体中文, and 繁體中文 are welcome.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task and the current limitation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain how the change would help, including an example if useful.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or context
+      description: Include any workaround you use and relevant compatibility requirements.
