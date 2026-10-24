@@ -74,9 +74,9 @@ export async function syncModels(catalog) {
       const ordered=[selected,...catalog.filter(m=>m.slug!==selected.slug)];
       const stmt=db.prepare(`INSERT INTO providers (id,app_type,name,settings_config,website_url,category,created_at,sort_index,notes,icon,meta,is_current)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,0) ON CONFLICT(id,app_type) DO UPDATE SET name=excluded.name,settings_config=excluded.settings_config,notes=excluded.notes,meta=excluded.meta,sort_index=excluded.sort_index`);
-      stmt.run(providerId(),'claude','ChatGPT 订阅',JSON.stringify(providerSettings(selected.slug)),
+      stmt.run(providerId(),'claude','Codex-Anywhere',JSON.stringify(providerSettings(selected.slug)),
         'https://learn.chatgpt.com/cookbook/articles/sign-in-with-chatgpt','custom',Date.now(),0,
-        `官方订阅授权 · ${catalog.length} 个模型 · 在聚合模式 /model 中切换。由 Bridge Manager 刷新模型；effort 原样传递。`,
+        `官方订阅授权 · ${catalog.length} 个模型 · 在聚合模式 /model 中切换。由 Codex-Anywhere 刷新模型；effort 原样传递。`,
         'openai',JSON.stringify({apiFormat:'anthropic',commonConfigEnabled:false,endpointAutoSelect:false,chatgptPlanBridge:true,
           stackModels:ordered.map(m=>({model:m.slug,displayName:m.displayName,oneM:true}))}));
       db.prepare("DELETE FROM providers WHERE app_type='claude' AND json_extract(meta,'$.chatgptPlanBridge')=1 AND id<>?").run(providerId());

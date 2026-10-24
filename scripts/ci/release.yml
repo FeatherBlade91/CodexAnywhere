@@ -25,15 +25,15 @@ jobs:
       - name: Checksum installer
         shell: pwsh
         run: |
-          Get-ChildItem dist/ChatGPT-Bridge-Setup-*.exe | ForEach-Object {
+          Get-ChildItem dist/Codex-Anywhere-Setup-*.exe | ForEach-Object {
             $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLower()
             "$hash  $($_.Name)" | Set-Content -Encoding utf8 "dist/$($_.Name).sha256"
           }
       - uses: actions/upload-artifact@v4
         with:
-          name: ChatGPT-Bridge-desktop
+          name: Codex-Anywhere-desktop
           path: |
-            dist/ChatGPT-Bridge-Setup-*.exe
+            dist/Codex-Anywhere-Setup-*.exe
             dist/*.sha256
       - name: Publish desktop release
         if: startsWith(github.ref, 'refs/tags/')
@@ -43,7 +43,7 @@ jobs:
         run: |
           gh release view $env:GITHUB_REF_NAME --json tagName 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $env:GITHUB_REF_NAME dist/ChatGPT-Bridge-Setup-*.exe dist/*.sha256 --title "ChatGPT Bridge $env:GITHUB_REF_NAME" --notes-file docs/RELEASE.md --latest
+            gh release create $env:GITHUB_REF_NAME dist/Codex-Anywhere-Setup-*.exe dist/*.sha256 --title "Codex-Anywhere $env:GITHUB_REF_NAME" --notes-file docs/RELEASE.md --latest
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           exit 0

@@ -1,9 +1,9 @@
-﻿ChatGPT Bridge — 桌面版使用指南
+﻿Codex-Anywhere — 桌面版使用指南
 
 安装与登录
 1. 从项目最新 Release 下载 Windows x64 桌面安装包：
-   https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest
-2. 安装并打开 ChatGPT Bridge，在界面中登录 ChatGPT。
+   https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest
+2. 安装并打开 Codex-Anywhere，在界面中登录 ChatGPT。
 3. 在浏览器中完成授权，返回应用刷新模型，启动服务。
 安装包自带运行环境。普通使用不需要 Node.js、Python 或命令行。
 
@@ -45,7 +45,7 @@ ECONNREFUSED：看清失败地址。CC Switch 的 127.0.0.1:15721 代理可能�
 
 卸载
 如果需要撤销 Claude Code 或 CC Switch 配置，请先在应用内执行恢复。
-然后退出应用，通过 Windows 设置中的已安装应用卸载 ChatGPT Bridge。
+然后退出应用，通过 Windows 设置中的已安装应用卸载 Codex-Anywhere。
 不要将卸载视为已恢复客户端配置或已删除个人授权数据。
 
 许可与反馈

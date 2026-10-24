@@ -24,18 +24,19 @@ function startWorker() {
   const local = process.env.LOCALAPPDATA || app.getPath('userData');
   let stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR;
   let appId = 'chatgpt-bridge';
-  let appName = 'ChatGPT Bridge';
+  let appName = 'Codex-Anywhere';
+  // Keep legacy auth IDs and storage paths so existing grants and settings remain usable.
   if (!stateDir) {
     if (existsSync(join(local, 'ChatGPTClaudeBridge', 'bridge.json'))) {
       stateDir = join(local, 'ChatGPTClaudeBridge');
-      appId = 'chatgpt-claude-bridge'; appName = 'ChatGPT Claude Bridge';
+      appId = 'chatgpt-claude-bridge'; appName = 'Codex-Anywhere';
     } else if (existsSync(join(local, 'ChatGPTGateway', 'bridge.json'))) {
       stateDir = join(local, 'ChatGPTGateway');
-      appId = 'chatgpt-api-gateway'; appName = 'ChatGPT API Gateway';
+      appId = 'chatgpt-api-gateway'; appName = 'Codex-Anywhere';
     } else stateDir = join(local, 'ChatGPTBridge');
   }
   worker = utilityProcess.fork(join(here, 'worker.mjs'), [], {
-    serviceName: 'ChatGPT Bridge service', stdio: 'pipe',
+    serviceName: 'Codex-Anywhere service', stdio: 'pipe',
     env: { ...process.env, CHATGPT_BRIDGE_STATE_DIR: stateDir, CHATGPT_BRIDGE_APP_ID: appId, CHATGPT_BRIDGE_APP_NAME: appName },
   });
   // Never forward backend logs or credentials into the renderer console.
@@ -55,7 +56,7 @@ function startWorker() {
 
 function createWindow() {
   window = new BrowserWindow({
-    title: 'ChatGPT Bridge', width: 1120, height: 800, minWidth: 800, minHeight: 640, icon: join(here, 'assets/icon.png'),
+    title: 'Codex-Anywhere', width: 1120, height: 800, minWidth: 800, minHeight: 640, icon: join(here, 'assets/icon.png'),
     backgroundColor: '#F3F6FA', autoHideMenuBar: true,
     webPreferences: { preload: join(here, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
@@ -92,7 +93,7 @@ else {
       return result;
     });
     createWindow();
-  }).catch(error => { dialog.showErrorBox('无法启动 ChatGPT Bridge', error.message); app.exit(1); });
+  }).catch(error => { dialog.showErrorBox('无法启动 Codex-Anywhere', error.message); app.exit(1); });
   app.on('window-all-closed', () => app.quit());
   app.on('before-quit', event => {
     if (quitting || !worker) return;

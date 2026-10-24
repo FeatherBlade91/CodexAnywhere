@@ -1,6 +1,6 @@
 # Third-party notices
 
-ChatGPT Bridge is an independent personal project. It is not an official OpenAI or Anthropic application.
+Codex-Anywhere is an independent personal project. It is not an official OpenAI or Anthropic application.
 
 ## OpenAI Sign in with ChatGPT Devkit
 

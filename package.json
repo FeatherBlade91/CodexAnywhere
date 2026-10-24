@@ -1,5 +1,5 @@
 {
-  "name": "chatgpt-bridge",
+  "name": "codex-anywhere",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,13 +23,13 @@
     "electron": "^45.0.0",
     "electron-builder": "^26.18.0"
   },
-  "productName": "ChatGPT Bridge",
+  "productName": "Codex-Anywhere",
   "description": "One desktop app for ChatGPT subscription connections",
   "author": "NamelessDDDoge",
   "main": "src/desktop/main.mjs",
   "build": {
     "appId": "com.nameless.chatgptbridge",
-    "productName": "ChatGPT Bridge",
+    "productName": "Codex-Anywhere",
     "directories": {
       "output": "dist"
     },
@@ -49,7 +49,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "ChatGPT-Bridge-Setup-${version}-${arch}.${ext}",
+      "artifactName": "Codex-Anywhere-Setup-${version}-${arch}.${ext}",
       "icon": "src/desktop/assets/icon.ico",
       "signExecutable": false
     },

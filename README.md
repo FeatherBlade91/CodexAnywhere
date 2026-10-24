@@ -1,12 +1,12 @@
 ﻿<div align="center">
 
-# ChatGPT Bridge
+# Codex-Anywhere
 
 [简体中文](docs/README.zh-CN.md) · [繁體中文](docs/README.zh-TW.md) · [English](README.md)
 
 **Use your ChatGPT subscription through a local API key.**
 
-[Download for Windows](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest) · [Usage guide](docs/USER-GUIDE.txt) · [Contributing](docs/CONTRIBUTING.md)
+[Download for Windows](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [Usage guide](docs/USER-GUIDE.txt) · [Contributing](docs/CONTRIBUTING.md)
 
 ![Windows x64](https://img.shields.io/badge/Windows-x64-36665D?style=flat-square)
 ![Electron desktop](https://img.shields.io/badge/Electron-desktop-506479?style=flat-square)
@@ -14,11 +14,11 @@
 
 </div>
 
-![ChatGPT Bridge desktop showing ChatGPT sign-in and OpenAI and Claude Code connection controls](docs/assets/desktop.png)
+![Codex-Anywhere desktop showing ChatGPT sign-in and OpenAI and Claude Code connection controls](docs/assets/desktop.png)
 
 *Actual Electron window before sign-in, captured with isolated test data and a masked key. The temporary test port shown differs from the default `17863`.*
 
-ChatGPT Bridge brings the former **Plan Bridge** and **API Gateway** together in one standalone Electron application. Sign in once, start one local service, and connect Claude Code or applications that accept an OpenAI-compatible API. Desktop installers are the only release format.
+Codex-Anywhere brings the former **Plan Bridge** and **API Gateway** together in one standalone Electron application. Sign in once, start one local service, and connect Claude Code or applications that accept an OpenAI-compatible API. Desktop installers are the only release format.
 
 The app uses OpenAI's Sign in with ChatGPT Devkit. Eligible accounts can authorize requests against their ChatGPT plan allowance through this [documented integration](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt). It does not reverse-proxy the ChatGPT website or reuse browser cookies. The bridge translates client requests locally; its API key secures that local service and is not an OpenAI platform API key.
 
@@ -26,14 +26,14 @@ Use remains subject to account eligibility, plan limits, OpenAI's terms, and the
 
 ```mermaid
 flowchart RL
-    C[Claude Code] -->|Anthropic Messages| B[ChatGPT Bridge desktop]
+    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere desktop]
     A[OpenAI-compatible apps] -->|Chat Completions / Responses| B
     B -->|One account · one local service| S[ChatGPT subscription models]
 ```
 
 ## Get connected
 
-1. Download the Windows x64 installer from [the latest release](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest) and open **ChatGPT Bridge**. The desktop package includes its runtime; a separate Node.js installation is unnecessary.
+1. Download the Windows x64 installer from [the latest release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) and open **Codex-Anywhere**. The desktop package includes its runtime; a separate Node.js installation is unnecessary.
 2. Sign in with ChatGPT in your browser, then refresh the available models.
 3. Start the local service. Copy its URL and local API key into your application, or use the Claude Code connection controls.
 
@@ -41,7 +41,7 @@ Claude Code and CC Switch are optional, separately installed clients. You do not
 
 ## One place for every connection
 
-| You want to… | In ChatGPT Bridge |
+| You want to… | In Codex-Anywhere |
 | --- | --- |
 | Use an OpenAI-compatible app | Copy the base URL and local API key; use `/v1/models` to find a model ID. |
 | Connect Claude Code | Apply direct configuration, or add the provider to CC Switch. |
@@ -75,7 +75,7 @@ All endpoints use the same local service and credentials. The default address is
 
 Quit the old Bridge/Gateway manager and stop its service before opening the desktop app. Existing data stays in place: the app reuses `%LOCALAPPDATA%\ChatGPTClaudeBridge` first, then `%LOCALAPPDATA%\ChatGPTGateway` if no Bridge directory exists. A fresh installation uses `%LOCALAPPDATA%\ChatGPTBridge`. When both legacy directories exist, Bridge takes precedence; credentials are not merged or copied.
 
-If Claude Code reports `ECONNREFUSED`, check the address in the error. CC Switch may point Claude Code at `127.0.0.1:15721`; that proxy can be offline even while ChatGPT Bridge on `17863` is healthy. Start CC Switch and its proxy, or explicitly choose direct Claude Code configuration in the desktop app.
+If Claude Code reports `ECONNREFUSED`, check the address in the error. CC Switch may point Claude Code at `127.0.0.1:15721`; that proxy can be offline even while Codex-Anywhere on `17863` is healthy. Start CC Switch and its proxy, or explicitly choose direct Claude Code configuration in the desktop app.
 
 In **Settings**, save the proxy before clicking **检测连接** (Check connection). This checks the saved proxy, authorization/API connectivity, and Claude Code's current local route. It does not send a model prompt or display credentials.
 
@@ -108,7 +108,7 @@ npm run test:desktop     # Desktop UI tests
 npm run dist             # Build the Windows desktop installer
 ```
 
-The installer is named `ChatGPT-Bridge-Setup-2.0.0-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
+The installer is named `Codex-Anywhere-Setup-2.0.0-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
 
 See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development and test isolation. Preserve [third-party notices](docs/THIRD-PARTY-NOTICES.md), the [project license](LICENSE), and the [OpenAI Devkit license](vendor/siwc/LICENSE).
 

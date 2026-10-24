@@ -36,7 +36,7 @@ assert((await dpapi('decrypt', await dpapi('encrypt', fixture))).equals(fixture)
 console.log('Packaged sources, licenses and Windows credential encryption verified.');
 const child = spawn(process.execPath, ['--test', 'tests/desktop.e2e.mjs'], {
   stdio: 'inherit', windowsHide: true,
-  env: { ...process.env, BRIDGE_TEST_EXE: join(directory, 'ChatGPT Bridge.exe') },
+  env: { ...process.env, BRIDGE_TEST_EXE: join(directory, 'Codex-Anywhere.exe') },
 });
 child.once('error', error => { console.error(error); process.exitCode = 1; });
 child.once('exit', code => { process.exitCode = code ?? 1; });

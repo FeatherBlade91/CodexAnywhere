@@ -1,12 +1,12 @@
 ﻿<div align="center">
 
-# ChatGPT Bridge
+# Codex-Anywhere
 
 [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [English](../README.md)
 
 **通过本地 API Key 使用 ChatGPT 订阅额度。**
 
-[下载 Windows 桌面版](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest) · [使用指南](USER-GUIDE.txt) · [参与开发](CONTRIBUTING.md)
+[下载 Windows 桌面版](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [使用指南](USER-GUIDE.txt) · [参与开发](CONTRIBUTING.md)
 
 ![Windows x64](https://img.shields.io/badge/Windows-x64-36665D?style=flat-square)
 ![Electron desktop](https://img.shields.io/badge/Electron-desktop-506479?style=flat-square)
@@ -14,11 +14,11 @@
 
 </div>
 
-![ChatGPT Bridge 桌面界面，包含 ChatGPT 登录、OpenAI 应用和 Claude Code 连接设置](assets/desktop.png)
+![Codex-Anywhere 桌面界面，包含 ChatGPT 登录、OpenAI 应用和 Claude Code 连接设置](assets/desktop.png)
 
 *真实 Electron 未登录界面，使用隔离测试数据，密钥已遮蔽。截图为临时测试端口，默认端口为 `17863`。*
 
-ChatGPT Bridge 将原来的 **Plan Bridge** 和 **API Gateway** 合并为独立的 Electron 桌面软件。登录一次，启动一个本地服务，即可连接 Claude Code 或支持 OpenAI 兼容接口的应用。Release 只提供桌面安装包。
+Codex-Anywhere 将原来的 **Plan Bridge** 和 **API Gateway** 合并为独立的 Electron 桌面软件。登录一次，启动一个本地服务，即可连接 Claude Code 或支持 OpenAI 兼容接口的应用。Release 只提供桌面安装包。
 
 软件使用 OpenAI 的 Sign in with ChatGPT Devkit，通过[官方文档介绍的授权方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，让符合条件的账号使用自己的 ChatGPT 套餐额度。它不反代 ChatGPT 网页，也不复用浏览器 Cookie。本地服务负责转换客户端请求；生成的 API Key 用于访问这个本地服务，并非 OpenAI 平台 API Key。
 
@@ -26,14 +26,14 @@ ChatGPT Bridge 将原来的 **Plan Bridge** 和 **API Gateway** 合并为独立�
 
 ```mermaid
 flowchart RL
-    C[Claude Code] -->|Anthropic Messages| B[ChatGPT Bridge 桌面版]
+    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere 桌面版]
     A[OpenAI 兼容应用] -->|Chat Completions / Responses| B
     B -->|同一账号 · 同一本地服务| S[ChatGPT 订阅模型]
 ```
 
 ## 开始使用
 
-1. 从[最新 Release](https://github.com/NamelessDDDoge/chatgpt-plan-bridge/releases/latest) 下载 Windows x64 安装包，安装并打开 **ChatGPT Bridge**。安装包包含运行环境，无须另装 Node.js。
+1. 从[最新 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) 下载 Windows x64 安装包，安装并打开 **Codex-Anywhere**。安装包包含运行环境，无须另装 Node.js。
 2. 在浏览器中完成 ChatGPT 登录，再刷新可用模型。
 3. 启动本地服务。将地址和本地 API Key 复制到应用，或使用界面中的 Claude Code 接入功能。
 
@@ -41,7 +41,7 @@ Claude Code 和 CC Switch 是可选客户端，需要单独安装。使用 OpenA
 
 ## 一个窗口管理连接
 
-| 想做什么 | 在 ChatGPT Bridge 中操作 |
+| 想做什么 | 在 Codex-Anywhere 中操作 |
 | --- | --- |
 | 连接 OpenAI 兼容应用 | 复制 Base URL 和 API Key；通过 `/v1/models` 获取模型 ID。 |
 | 连接 Claude Code | 应用直连配置，或添加 CC Switch 供应商。 |
@@ -108,7 +108,7 @@ npm run test:desktop     # 桌面界面测试
 npm run dist             # 构建 Windows 桌面安装包
 ```
 
-安装包名称为 `ChatGPT-Bridge-Setup-2.0.0-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
+安装包名称为 `Codex-Anywhere-Setup-2.0.0-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
 
 开发约定和测试隔离见 [CONTRIBUTING.md](CONTRIBUTING.md)。请保留[第三方声明](THIRD-PARTY-NOTICES.md)、[项目许可](../LICENSE)及 [OpenAI Devkit 许可](../vendor/siwc/LICENSE)。
 

@@ -13,7 +13,7 @@ export function createGateway({ apiKey, client, request, listModels, autoLogin =
     if (!login) login = (async () => {
       const session = await client.getSession();
       if (session.sharing) return;
-      if (!autoLogin && !explicit) throw Object.assign(new Error('请先在 ChatGPT Bridge 桌面应用中登录。'), { status: 401, code: 'login_required' });
+      if (!autoLogin && !explicit) throw Object.assign(new Error('请先在 Codex-Anywhere 桌面应用中登录。'), { status: 401, code: 'login_required' });
       if (!(await client.signIn()).sharing) throw Object.assign(new Error('ChatGPT sharing permission is required'), { status: 403 });
     })().finally(() => { login = undefined; });
     return login;
