@@ -39,6 +39,8 @@ flowchart RL
 
 Claude Code 和 CC Switch 是選用的用戶端，需要另外安裝。使用 OpenAI 相容應用程式時不需要它們。
 
+點擊視窗關閉按鈕會隱藏到系統匣，本機服務繼續執行。點擊系統匣圖示或重新開啟軟體可恢復視窗；完全結束請右鍵點擊系統匣圖示，選擇「退出」。
+
 ## 一個視窗管理連接
 
 | 想做什麼 | 在 Codex-Anywhere 中操作 |
@@ -108,7 +110,11 @@ npm run test:desktop     # 桌面介面測試
 npm run dist             # 建置 Windows 桌面安裝程式
 ```
 
-安裝程式名稱為 `Codex-Anywhere-Setup-1.0.0-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
+安裝程式名稱為 `Codex-Anywhere-Setup-1.0.1-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
 
 開發約定和測試隔離見 [CONTRIBUTING.md](CONTRIBUTING.md)。請保留[第三方聲明](THIRD-PARTY-NOTICES.md)、[專案授權](../LICENSE)及 [OpenAI Devkit 授權](../vendor/siwc/LICENSE)。
 
+
+### OpenAI 設定範例
+
+首頁提供模型 ID、最簡單的 Python 聊天程式及思考強度對應說明，詳見 [OpenAI / DeepSeek Harness 設定範例](OPENAI-EXAMPLES.md)。

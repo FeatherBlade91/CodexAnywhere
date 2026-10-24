@@ -15,7 +15,8 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
   await writeFile(join(dir, 'bridge.json'), JSON.stringify({ port, localKey: 'isolated-desktop-test-key', proxy: '', model: 'test-model' }));
   const env = { ...process.env, CHATGPT_BRIDGE_STATE_DIR: dir };
   delete env.ELECTRON_RUN_AS_NODE;
-  const options = process.env.BRIDGE_TEST_EXE ? { executablePath: resolve(process.env.BRIDGE_TEST_EXE), args: [] } : { args: [resolve('.')] };
+  const profileArg = `--user-data-dir=${join(dir, 'electron-profile')}`;
+  const options = process.env.BRIDGE_TEST_EXE ? { executablePath: resolve(process.env.BRIDGE_TEST_EXE), args: [profileArg] } : { args: [resolve('.'), profileArg] };
   const desktop = await electron.launch({ ...options, env });
   let closed = false;
   try {
@@ -30,6 +31,13 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
     assert.equal(await page.evaluate(() => typeof window.require), 'undefined');
     assert.equal(await page.locator('#api-key').getAttribute('type'), 'password');
     assert.equal(await page.locator('#base-url').inputValue(), `http://127.0.0.1:${port}/v1`);
+    assert.equal(await page.locator('#example-model').inputValue(), 'test-model');
+    const example = await page.locator('#python-example').textContent();
+    assert.ok(example.includes(`http://127.0.0.1:${port}/v1`));
+    assert.ok(example.includes('model="test-model"'));
+    assert.ok(example.includes('reasoning_effort="high"'));
+    assert.ok(!example.includes('isolated-desktop-test-key'));
+    assert.ok((await page.locator('.quickstart').textContent()).includes('xhigh → xhigh'));
     await page.locator('#toggle-service').click();
     await page.locator('#toggle-service').filter({ hasText: '停止服务' }).waitFor();
     const health = await fetch(`http://127.0.0.1:${port}/health`);
@@ -59,6 +67,15 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: 'test-results/desktop-compact.png', fullPage: true });
     assert.deepEqual(errors, []);
+    // Closing the native window must keep the service available in the tray.
+    await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+    assert.equal(await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible()), false);
+    assert.equal((await fetch(`http://127.0.0.1:${port}/health`)).status, 200);
+    // Reopening the application restores the existing window and worker.
+    await desktop.evaluate(({ app }) => app.emit('second-instance'));
+    assert.equal(await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible()), true);
+    assert.equal((await fetch(`http://127.0.0.1:${port}/health`)).status, 200);
+    await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
     await desktop.close(); closed = true;
     await assert.rejects(fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(2000) }));
   } finally { if (!closed) await desktop.close(); }

@@ -21,6 +21,7 @@ function render() {
   $('launch-at-login').checked = Boolean(state.launchAtLogin); $('state-dir').textContent = state.stateDir || ''; $('version').textContent = state.version ? `版本 ${state.version}` : '桌面版';
   if (Array.isArray(state.models)) availableModels = state.models;
   renderModels();
+  renderExample();
 }
 function renderModels() {
   const signature = JSON.stringify([availableModels, state.model, busy, isLoggedIn()]);
@@ -65,3 +66,23 @@ $('launch-at-login').addEventListener('change', () => action(() => api('setLaunc
 $('open-data').addEventListener('click', () => action(() => api('openDataFolder')));
 refresh().catch(error => notice(`无法读取服务状态：${errorText(error)}`, true));
 setInterval(() => { if (!busy && !$('confirm-dialog').open) refresh().catch(() => {}); }, 4000);
+
+function renderExample() {
+  const model = availableModels.find(m => (m.slug || m.id) === state.model) || availableModels[0];
+  const slug = model?.slug || model?.id || state.model || 'gpt-6.1-sol';
+  const effort = model?.efforts?.includes('high') ? 'high' : model?.efforts?.[0] || 'high';
+  $('example-model').value = slug;
+  $('example-efforts').textContent = model?.efforts?.length ? `${slug} 当前目录支持：${model.efforts.join('、')}。` : '登录并刷新模型后，这里显示示例模型支持的强度。';
+  $('python-example').textContent = `from openai import OpenAI
+
+client = OpenAI(
+    base_url=${JSON.stringify(state.baseURL || 'http://127.0.0.1:17863/v1')},
+    api_key="粘贴上方本地 API 密钥",
+)
+reply = client.chat.completions.create(
+    model=${JSON.stringify(slug)},
+    messages=[{"role": "user", "content": "你好"}],
+    reasoning_effort=${JSON.stringify(effort)},
+)
+print(reply.choices[0].message.content)`;
+}
