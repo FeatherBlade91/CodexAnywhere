@@ -12,7 +12,7 @@ The real Electron source-app end-to-end test passed, including isolated IPC acce
 
 The packaged application also passed its Electron end-to-end test. SHA-256 archive integrity checks and Windows DPAPI credential encryption checks passed. The final NSIS installer was installed into an isolated temporary directory; the installed application passed the same archive, encryption and Electron checks. Silent uninstall exited successfully and removed the application executable. Tests used Windows 11 x64. New live subscription/model requests were not part of these desktop packaging checks.
 
-Final artifact: `ChatGPT-Bridge-Setup-2.0.0-x64.exe` (123,403,871 bytes). SHA-256: `3a1da95b7b9004b2f353467a78bcedb1ddf22f1de5755408e128d513ac2a5683`.
+Final artifact: `ChatGPT-Bridge-Setup-2.0.0-x64.exe` (123,404,086 bytes). SHA-256: `0c1e8cdad16d2fd24e51cd6f244ecdb10d5abf19d3f70b93d2da5707be7d1fd8`.
 
 The older installer checksum and architecture results below belong to the previous release and do not validate the new desktop installer.
 
