@@ -25,7 +25,7 @@ ChatGPT Bridge 將原來的 **Plan Bridge** 和 **API Gateway** 合併為獨立�
 使用時仍須符合帳號資格、方案限制、OpenAI 條款和 Devkit 的非商業授權。採用官方授權方式不代表任何用途都完全合規，也不能保證零停權風險；具體使用須遵守 [OpenAI 使用條款](https://openai.com/policies/terms-of-use/)。
 
 ```mermaid
-flowchart LR
+flowchart RL
     C[Claude Code] -->|Anthropic Messages| B[ChatGPT Bridge 桌面版]
     A[OpenAI 相容應用程式] -->|Chat Completions / Responses| B
     B -->|同一帳號 · 同一本機服務| S[ChatGPT 訂閱模型]

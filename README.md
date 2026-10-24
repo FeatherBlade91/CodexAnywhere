@@ -25,7 +25,7 @@ The app uses OpenAI's Sign in with ChatGPT Devkit. Eligible accounts can authori
 Use remains subject to account eligibility, plan limits, OpenAI's terms, and the Devkit's noncommercial license. This integration does not establish blanket compliance for every use or guarantee that an account cannot be suspended; OpenAI's [Terms of Use](https://openai.com/policies/terms-of-use/) still apply.
 
 ```mermaid
-flowchart LR
+flowchart RL
     C[Claude Code] -->|Anthropic Messages| B[ChatGPT Bridge desktop]
     A[OpenAI-compatible apps] -->|Chat Completions / Responses| B
     B -->|One account · one local service| S[ChatGPT subscription models]
