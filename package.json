@@ -59,7 +59,10 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "installerIcon": "src/desktop/assets/icon.ico",
+      "uninstallerIcon": "src/desktop/assets/icon.ico",
+      "installerHeaderIcon": "src/desktop/assets/icon.ico"
     },
     "publish": null
   }

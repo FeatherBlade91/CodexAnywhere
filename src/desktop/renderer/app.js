@@ -24,7 +24,6 @@ function render() {
   $('toggle-service').textContent = state.running ? t('停止服务') : t('启动服务'); $('toggle-service').disabled = busy;
   $('account-state').textContent = loggingIn ? t('请在浏览器中完成登录…') : loggedIn ? t('已登录，可以连接你的应用') : state.session?.status === 'reauth_required' ? t('登录已过期，请重新登录') : t('登录后开始使用 ChatGPT 订阅');
   $('login').hidden = loggedIn || loggingIn; $('cancel-login').hidden = !loggingIn; $('logout').hidden = !loggedIn;
-  $('route-proxy').textContent = state.proxy ? t('通过已保存代理') : t('直连上游');
   $('base-url').value = state.baseURL || ''; $('anthropic-url').value = state.anthropicURL || ''; $('api-key').value = state.apiKey || '';
   $('key-rotation').value = String(state.keyRotationHours || 0);
   $('key-reconnect').hidden = !state.integrationNeedsReconnect;
