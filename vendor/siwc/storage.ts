@@ -81,6 +81,8 @@ export class ConnectionStore {
   readonly #hostFilename: string;
   readonly #encryption: CredentialEncryption;
   readonly #context = new AsyncLocalStorage<{ compromised: boolean }>();
+  #queue: Promise<void> = Promise.resolve();
+  #cached: { ciphertext: string; state: StoredState } | undefined;
 
   constructor(directory: string, encryption: CredentialEncryption) {
     if (!encryption || typeof encryption.id !== "string" || !/^[a-z0-9][a-z0-9._-]{0,99}$/.test(encryption.id) ||
@@ -107,6 +109,30 @@ export class ConnectionStore {
   }
 
   async withLock<T>(operation: () => Promise<T>, signal?: AbortSignal): Promise<T> {
+    // Queue local callers without repeatedly contending on the filesystem lock.
+    // Keep the interprocess lock and re-read the encrypted file on every access.
+    const previous = this.#queue;
+    let finish!: () => void;
+    const turn = new Promise<void>(resolve => { finish = resolve; });
+    this.#queue = previous.then(() => turn);
+    let abort: (() => void) | undefined;
+    try {
+      signal?.throwIfAborted();
+      if (signal) {
+        await Promise.race([previous, new Promise<never>((_, reject) => {
+          abort = () => reject(new ChatGPTError("cancelled", "The request was cancelled."));
+          signal.addEventListener("abort", abort, { once: true });
+        })]);
+      } else await previous;
+      signal?.throwIfAborted();
+      return await this.#withFileLock(operation, signal);
+    } catch (error) {
+      if (signal?.aborted) throw new ChatGPTError("cancelled", "The request was cancelled.");
+      throw error;
+    } finally { if (abort) signal?.removeEventListener("abort", abort); finish(); }
+  }
+
+  async #withFileLock<T>(operation: () => Promise<T>, signal?: AbortSignal): Promise<T> {
     const context = { compromised: false };
     let release: (() => Promise<void>) | undefined;
     try {
@@ -182,8 +208,14 @@ export class ConnectionStore {
 
   async read(): Promise<StoredState | undefined> {
     this.#assertLocked();
-    await this.#requireEncryption();
-    const value = await this.#readFile(this.#filename);
+    try { await this.#requireEncryption(); }
+    catch (error) { this.#cached = undefined; throw error; }
+    let value: unknown;
+    try { value = await this.#readFile(this.#filename); }
+    catch (error) { this.#cached = undefined; throw error; }
+    // Compare actual ciphertext, not timestamps: external writes, rotation and
+    // logout must be observed even when size and modification time are unchanged.
+    if (!isObject(value) || value.version !== 3 || value.provider !== this.#encryption.id || value.ciphertext !== this.#cached?.ciphertext) this.#cached = undefined;
     if (value === undefined) return undefined;
     if (isObject(value) && value.version === 3) {
       if (typeof value.provider !== "string" || typeof value.ciphertext !== "string" || !value.ciphertext ||
@@ -194,9 +226,12 @@ export class ConnectionStore {
         throw new ChatGPTError("storage_provider_mismatch", "Use the credential encryption provider that created this file. Saved credentials have been preserved.");
       }
       try {
+        if (this.#cached) return structuredClone(this.#cached.state);
         const plaintext = await this.#encryption.decrypt(Buffer.from(value.ciphertext, "base64"));
         if (typeof plaintext !== "string") throw new Error("Invalid decryption result");
-        return validateState(JSON.parse(plaintext) as unknown);
+        const state = validateState(JSON.parse(plaintext) as unknown);
+        this.#cached = { ciphertext: value.ciphertext, state: structuredClone(state) };
+        return state;
       } catch {
         throw new ChatGPTError("storage_decryption_failed", "Saved credentials could not be decrypted. Restore access to your OS credential store or restore the credential file. Saved credentials have been preserved.");
       }
@@ -249,6 +284,7 @@ export class ConnectionStore {
 
   async write(record: StoredState): Promise<void> {
     this.#assertLocked();
+    this.#cached = undefined;
     await this.#requireEncryption();
     validateState(record);
     let ciphertext: Uint8Array;

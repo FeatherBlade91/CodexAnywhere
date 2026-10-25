@@ -14,6 +14,8 @@ Modifications dated 2026-10-23: TypeScript is stripped for runtime distribution,
 
 ## npm dependencies
 
+Modifications dated 2026-10-25: credential storage serializes in-process lock contenders and caches one decrypted state keyed by the exact on-disk ciphertext. Every access still validates the provider and reads the file under the interprocess lock; callers receive independent copies. The cache is invalidated on writes or changed/invalid storage. These modifications follow the same Devkit license.
+
 Dependencies retain their original license files under `node_modules`. The included packages use these licenses:
 
 | Package | License |

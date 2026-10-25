@@ -1,17 +1,9 @@
 import { resolveModelId } from './model-mapping.mjs';
-import { client, stateDir, config } from './runtime.mjs';
-import { writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { client, config } from './runtime.mjs';
+import { createModelCache } from './model-cache.mjs';
 import { EFFORT_LEVELS } from './protocol.mjs';
-let cached;
-let pending;
-let generation = 0;
-export function clearModels() { cached = undefined; generation++; }
-export async function models(refresh = false) {
-  if (!refresh && cached && Date.now() - cached.time < 60_000) return cached.models;
-  if (pending) return pending;
-  const requestedGeneration = generation;
-  pending = client.withAccessToken(async (token, signal) => {
+const cache = createModelCache(() => client.withAccessToken(async (token, signal) => {
+    signal = AbortSignal.any([signal, AbortSignal.timeout(15_000)]);
     const res = await fetch('https://api.openai.com/v1/models', { headers: { authorization: `Bearer ${token}` }, redirect: 'error', signal });
     if (!res.ok) throw new Error(`Model discovery HTTP ${res.status}`);
     const data = await res.json();
@@ -24,16 +16,14 @@ export async function models(refresh = false) {
       supportsExperimentalContext: m.supports_experimental_context === true,
     }));
     if (!result.length) throw new Error('No models available for this ChatGPT account.');
-    if (generation !== requestedGeneration) return result;
-    cached = { time: Date.now(), models: result };
-    await writeFile(join(stateDir, 'models.json'), JSON.stringify(cached, null, 2));
     return result;
-  }).finally(() => { pending = undefined; });
-  return pending;
-}
+  }));
+export function clearModels() { cache.clear(); }
+export function models(refresh = false) { return cache.get(refresh); }
 export async function selectModel(requested) {
   const slug = resolveModelId(requested, config);
-  const model = (await models()).find(m => m.slug === slug);
+  let model = (await models()).find(m => m.slug === slug);
+  if (!model) model = (await models(true)).find(m => m.slug === slug);
   if (!model) { const e = new Error(`Model ${slug} is not available for this account. Refresh models or sign in again.`); e.status = 400; e.code = 'model_unavailable'; throw e; }
   return model;
 }

@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "pretest": "npm run build",
     "build": "node scripts/build.mjs",
     "start": "npm run build && electron .",
     "dist": "npm run build && electron-builder --win nsis --x64 --publish never",
     "pack": "npm run build && electron-builder --win --dir --x64 --publish never",
-    "test": "node --test tests/protocol.test.mjs tests/integration.test.mjs tests/restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs tests/gateway.test.mjs tests/desktop-service.test.mjs tests/network.test.mjs tests/language.test.mjs tests/python-example.test.mjs",
+    "test": "node --test tests/protocol.test.mjs tests/integration.test.mjs tests/restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs tests/gateway.test.mjs tests/desktop-service.test.mjs tests/network.test.mjs tests/language.test.mjs tests/python-example.test.mjs tests/credential-performance.test.mjs tests/model-cache.test.mjs",
     "test:desktop": "node --test --test-concurrency=1 tests/desktop.e2e.mjs tests/language.e2e.mjs tests/language-restart.e2e.mjs",
     "test:live": "node scripts/live/e2e.mjs"
   },
@@ -17,7 +18,7 @@
     "proper-lockfile": "^4.1.2",
     "undici": "^7.0.0"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "electron": "^45.0.0",

@@ -63,7 +63,9 @@ export function createGateway({ apiKey, client, request, listModels, autoLogin =
         payload.stream = true;
         payload.store = false;
       }
-      await ensureSession();
+      // Desktop authorization is checked by withAccessToken below. Avoid a
+      // redundant getSession/store read on every inference request.
+      if (autoLogin || isModels) await ensureSession();
       signal.throwIfAborted();
       if (isModels) return json(res, 200, { object: 'list', data: (await listModels(signal)).map(m => ({ id: m.slug || m.id, object: 'model', created: 0, owned_by: 'openai' })) });
       await client.withAccessToken(async (token, authSignal) => {
@@ -107,7 +109,8 @@ export function createGateway({ apiKey, client, request, listModels, autoLogin =
       }, signal);
     } catch (e) {
       if (res.destroyed) return;
-      const status = e.status >= 400 && e.status < 600 ? e.status : 502;
+      const authStatus = { sign_in_required: 401, sharing_not_enabled: 403, connection_busy: 409 };
+      const status = Object.hasOwn(authStatus, e.code) ? authStatus[e.code] : e.status >= 400 && e.status < 600 ? e.status : 502;
       const error = { message: status < 500 ? e.message : 'ChatGPT request failed. Check login, network, or retry.', type: status === 400 ? 'invalid_request_error' : 'api_error', code: e.code || 'gateway_error', param: null };
       if (res.headersSent) res.end(`${chat ? '' : 'event: error\n'}data: ${JSON.stringify({ error })}\n\n`);
       else json(res, status, { error });

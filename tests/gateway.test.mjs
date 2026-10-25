@@ -5,6 +5,41 @@ import OpenAI from 'openai';
 import { createGateway } from '../src/core/openai-server.mjs';
 import { chatPayload } from '../src/core/openai-protocol.mjs';
 
+test('desktop inference checks credentials once and streams before completion', { timeout: 10_000 }, async t => {
+  let reads = 0, stream;
+  const server = createGateway({ apiKey: 'test', autoLogin: false,
+    client: { getSession: () => assert.fail('redundant session read'), signIn: () => assert.fail('unexpected login'),
+      withAccessToken: (fn, signal) => { reads++; return fn('synthetic', signal); } },
+    request: async () => new Response(new ReadableStream({ start(controller) { stream = controller;
+      controller.enqueue(new TextEncoder().encode('data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"first"}\n\n'));
+    } })),
+  });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); server.close(); });
+  for (const path of ['responses', 'chat/completions']) {
+    const res = await fetch(`http://127.0.0.1:${server.address().port}/v1/${path}`, { method: 'POST', headers: { authorization: 'Bearer test' },
+      body: JSON.stringify({ model: 'test', input: 'hi', messages: [{ role: 'user', content: 'hi' }], stream: true }) });
+    assert.equal(res.status, 200);
+    const reader = res.body.getReader(); let text = '';
+    while (!text.includes('first')) text += new TextDecoder().decode((await reader.read()).value);
+    // Upstream has not completed yet, but the client already received text.
+    stream.enqueue(new TextEncoder().encode('data: {"type":"response.completed","response":{"status":"completed","output":[]}}\n\n'));
+    stream.close(); while (!(await reader.read()).done) {}
+  }
+  assert.equal(reads, 2);
+});
+
+test('desktop inference still rejects disconnected accounts before any upstream request', async t => {
+  const server = createGateway({ apiKey: 'test', autoLogin: false,
+    client: { withAccessToken: async () => { throw Object.assign(Error('Sign in'), { code: 'sign_in_required' }); } },
+    request: () => assert.fail('unauthorized upstream request'),
+  });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); server.close(); });
+  const res = await fetch(`http://127.0.0.1:${server.address().port}/v1/responses`, { method: 'POST', headers: { authorization: 'Bearer test' }, body: JSON.stringify({ model: 'test', input: 'hi' }) });
+  assert.equal(res.status, 401); assert.equal((await res.json()).error.code, 'sign_in_required');
+});
+
 async function fixture(t, { tool = false, broken = false } = {}) {
   let logins = 0, requests = 0, payload;
   const client = {
