@@ -41,6 +41,12 @@ test('desktop language detection, cancellation, persistence and restart request'
         assert.match(await page.locator('#notice').textContent(), /must start with/);
         const visibleText = await page.locator('body').innerText();
         assert.equal(/[\u4e00-\u9fff]/.test(visibleText.replace('简体中文', '').replace('繁體中文', '')), false);
+        for (const name of ['connections', 'guide']) {
+          await page.locator(`.nav-item[data-page="${name}"]`).click();
+          if (name === 'guide') await page.locator('#page-guide details').evaluateAll(items => items.forEach(item => { item.open = true; }));
+          assert.equal(/[\u4e00-\u9fff]/.test(await page.locator('body').innerText()), false, `${name} must be fully translated`);
+        }
+        await page.locator('.nav-item[data-page="settings"]').click();
       }
       await page.setViewportSize({ width: 800, height: 640 });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);

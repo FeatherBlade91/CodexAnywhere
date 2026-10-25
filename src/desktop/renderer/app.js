@@ -3,20 +3,27 @@ const locale = await window.bridge.invoke('getLanguage');
 const t = translator(locale.language);
 localizeDocument(document, t, locale.language);
 const $ = (id) => document.getElementById(id);
-let state = {}, busy = false, loginPending = false, page = 'connections', availableModels = [], noticeTimer, modelsSignature = '';
+let state = {}, busy = false, loginPending = false, page = 'connections', availableModels = [], noticeTimer, modelsSignature = '', connectionSignature = '';
 const api = (method, args) => window.bridge.invoke(method, args);
 function notice(message, error = false) { clearTimeout(noticeTimer); $('notice').textContent = message; $('notice').classList.toggle('error', error); $('notice').hidden = false; if (!error) noticeTimer = setTimeout(() => { $('notice').hidden = true; }, 6000); }
 function errorText(error) { return t((error?.message || String(error)).replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')); }
-function navigate(target) { page = target; document.querySelectorAll('.page').forEach(el => { el.hidden = el.id !== `page-${target}`; }); document.querySelectorAll('.nav-item').forEach(el => { el.classList.toggle('active', el.dataset.page === target); if (el.dataset.page === target) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); }); $('breadcrumb').textContent = `${t('工作空间')} / ${{ connections: t('连接'), models: t('模型'), settings: t('设置') }[target]}`; }
+function navigate(target) { page = target; document.querySelectorAll('.page').forEach(el => { el.hidden = el.id !== `page-${target}`; }); document.querySelectorAll('.nav-item').forEach(el => { el.classList.toggle('active', el.dataset.page === target); if (el.dataset.page === target) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); }); $('breadcrumb').textContent = `${t('工作空间')} / ${{ connections: t('连接'), models: t('模型'), settings: t('设置'), guide: t('接入指南') }[target]}`; }
 document.querySelectorAll('[data-page]').forEach(el => el.addEventListener('click', () => navigate(el.dataset.page)));
 document.querySelector('.brand').addEventListener('click', () => navigate('connections'));
 function isLoggedIn() { const status = state.session?.status; return Boolean(state.session?.sharing) && ['authenticated', 'logged_in', 'ready', 'connected', 'logged-in'].includes(status); }
 function render() {
+  const signature = JSON.stringify([state.running, state.port, state.proxy]);
+  if (signature !== connectionSignature) {
+    $('quick-test-result').hidden = true;
+    $('connection-result').hidden = true;
+    connectionSignature = signature;
+  }
   const loggedIn = isLoggedIn(), loggingIn = loginPending || ['connecting', 'pending', 'logging_in', 'authorizing', 'logging-in'].includes(state.session?.status);
   $('service-status').classList.toggle('stopped', !state.running); $('service-status').replaceChildren(Object.assign(document.createElement('i'), { ariaHidden: 'true' }), document.createTextNode(state.running ? t('服务运行中 · {port}', { port: state.port || t('本地') }) : t('服务已停止')));
   $('toggle-service').textContent = state.running ? t('停止服务') : t('启动服务'); $('toggle-service').disabled = busy;
   $('account-state').textContent = loggingIn ? t('请在浏览器中完成登录…') : loggedIn ? t('已登录，可以连接你的应用') : state.session?.status === 'reauth_required' ? t('登录已过期，请重新登录') : t('登录后开始使用 ChatGPT 订阅');
   $('login').hidden = loggedIn || loggingIn; $('cancel-login').hidden = !loggingIn; $('logout').hidden = !loggedIn;
+  $('route-proxy').textContent = state.proxy ? t('通过已保存代理') : t('直连上游');
   $('base-url').value = state.baseURL || ''; $('anthropic-url').value = state.anthropicURL || ''; $('api-key').value = state.apiKey || '';
   $('current-model').textContent = loggedIn ? state.model || t('尚未选择') : t('登录后选择模型');
   const integration = state.integration; $('integration-state').textContent = typeof integration === 'string' && integration ? ({direct:t('已配置 Claude Code'),'cc-switch':t('已添加到 CC Switch'),none:t('尚未配置')}[integration] || integration) : integration?.mode ? t('已配置 {name}', { name: integration.mode === 'direct' ? 'Claude Code' : 'CC Switch' }) : t('尚未配置');
@@ -48,23 +55,36 @@ $('restore').addEventListener('click', async () => { if (await confirmAction(t('
 $('refresh-models').addEventListener('click', () => action(async () => { const result = await api('models'); availableModels = Array.isArray(result) ? result : result?.models || []; }, t('模型列表已刷新')));
 $('proxy').addEventListener('input', () => { $('proxy').dataset.dirty = 'true'; });
 $('proxy-form').addEventListener('submit', event => { event.preventDefault(); action(async () => { await api('setProxy', $('proxy').value.trim()); delete $('proxy').dataset.dirty; }, t('代理设置已保存')); });
-$('test-connection').addEventListener('click', () => action(async () => {
-  const output = $('connection-result');
-  output.hidden = false;
-  output.classList.remove('error');
-  output.textContent = t('正在使用已保存的代理设置检测连接…');
-  $('test-connection').textContent = t('检测中…');
-  try {
-    const result = await api('testConnection');
-    const connection = result?.connection;
-    if (!connection || typeof connection.ok !== 'boolean') throw new Error(t('未收到连接检测结果，请重试。'));
-    output.classList.toggle('error', !connection.ok);
-    output.textContent = `${connection.ok ? t('连接正常') : t('连接失败')}：${t(connection.message || '') || (connection.ok ? t('可以连接服务。') : t('请检查代理地址及代理软件是否正在运行。'))}${connection.target ? `\n${t('检测目标：{target}', { target: connection.target })}` : ''}`;
-  } catch (error) {
-    output.classList.add('error');
-    output.textContent = t('连接检测失败：{error}', { error: errorText(error) });
-  } finally { $('test-connection').textContent = t('检测连接'); }
-}));
+async function runConnectionTest(outputId) {
+  await action(async () => {
+    const output = $(outputId);
+    output.hidden = false;
+    output.classList.remove('error');
+    output.textContent = t('正在使用已保存的代理设置检测连接…');
+    $('test-connection').textContent = t('检测中…');
+    $('quick-test').textContent = t('检测中…');
+    try {
+      const result = await api('testConnection');
+      const connection = result?.connection;
+      if (!connection || typeof connection.ok !== 'boolean') throw new Error(t('未收到连接检测结果，请重试。'));
+      output.classList.toggle('error', !connection.ok);
+      const lines = [connection.ok ? t('连接正常') : t('连接需要处理'), t(connection.message || '')];
+      if (connection.localBridge) lines.push(t('本地服务：{result}', { result: connection.localBridge.ok ? t('连接正常') : t(connection.localBridge.message) }));
+      for (const check of connection.checks || []) lines.push(check.host + ' · ' + (check.ok ? t('网络可达') : t('连接失败')) + (check.status ? ' (HTTP ' + check.status + ')' : '') );
+      lines.push(t('未发送聊天内容；未验证模型生成、账号额度或模型权限。'));
+      if ($('proxy').dataset.dirty) lines.push(t('代理地址尚未保存，本次使用的是已保存的设置。'));
+      output.textContent = lines.filter(Boolean).join('\n');
+    } catch (error) {
+      output.classList.add('error');
+      output.textContent = t('连接检测失败：{error}', { error: errorText(error) });
+    } finally {
+      $('test-connection').textContent = t('检测连接');
+      $('quick-test').textContent = t('一键测试');
+    }
+  });
+}
+$('test-connection').addEventListener('click', () => runConnectionTest('connection-result'));
+$('quick-test').addEventListener('click', () => runConnectionTest('quick-test-result'));
 $('launch-at-login').addEventListener('change', () => action(() => api('setLaunchAtLogin', $('launch-at-login').checked), t('启动设置已保存')));
 $('open-data').addEventListener('click', () => action(() => api('openDataFolder')));
 refresh().catch(error => notice(t('无法读取服务状态：{error}', { error: errorText(error) }), true));
@@ -88,11 +108,13 @@ function renderExample() {
   const effort = model?.efforts?.includes('high') ? 'high' : model?.efforts?.[0] || 'high';
   $('example-model').value = slug;
   $('example-efforts').textContent = model?.efforts?.length ? t('{model} 当前目录支持：{efforts}。', { model: slug, efforts: model.efforts.join(', ') }) : t('登录并刷新模型后，这里显示示例模型支持的强度。');
-  $('python-example').textContent = `from openai import OpenAI
+  $('python-example').textContent = `from openai import OpenAI, DefaultHttpxClient
 
 client = OpenAI(
     base_url=${JSON.stringify(state.baseURL || 'http://127.0.0.1:17863/v1')},
     api_key=${JSON.stringify(t('粘贴上方本地 API 密钥'))},
+    http_client=DefaultHttpxClient(trust_env=False, follow_redirects=False),
+    max_retries=0,
 )
 reply = client.chat.completions.create(
     model=${JSON.stringify(slug)},

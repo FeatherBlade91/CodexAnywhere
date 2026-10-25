@@ -2,7 +2,7 @@ import { t } from './localize.mjs';
 ﻿import { client, config, saveConfig, stateDir, applyProxy } from '../core/runtime.mjs';
 import { models, clearModels } from '../core/catalog.mjs';
 import { createBridgeServer } from '../core/server.mjs';
-import { testConnection, explainConnectionError, inspectClaudeRoute } from './network.mjs';
+import { testConnection, explainConnectionError, inspectClaudeRoute, inspectLocalBridge } from './network.mjs';
 
 export function createDesktopService(dependencies = {}) {
   const auth = dependencies.client || client;
@@ -106,15 +106,25 @@ export function createDesktopService(dependencies = {}) {
         let url; try { url = new URL(proxy); } catch { throw new Error(t('请输入有效的 HTTP 或 HTTPS 代理地址。')); }
         if (!['http:', 'https:'].includes(url.protocol)) throw new Error(t('代理地址必须以 http:// 或 https:// 开头。'));
       }
-      (dependencies.applyProxy || applyProxy)(proxy);
-      settings.proxy = proxy; await persist();
+      const previous = settings.proxy || '';
+      const updateProxy = dependencies.applyProxy || applyProxy;
+      updateProxy(proxy);
+      settings.proxy = proxy;
+      try { await persist(); }
+      catch (error) {
+        settings.proxy = previous;
+        updateProxy(previous);
+        throw error;
+      }
     } else throw new Error(t('未知桌面操作。'));
     return status();
   }
   return {
     invoke(method, args) {
       if (method === 'status') return status();
-      if (method === 'testConnection') return (dependencies.testConnection || testConnection)({ proxy: settings.proxy || '', inspectRoute: dependencies.inspectClaudeRoute || inspectClaudeRoute }).then(async connection => ({ ...await status(), connection }));
+      if (method === 'testConnection') return (dependencies.testConnection || testConnection)({ proxy: settings.proxy || '', inspectRoute: dependencies.inspectClaudeRoute || inspectClaudeRoute,
+        inspectBridge: () => (dependencies.inspectLocalBridge || inspectLocalBridge)({ port: settings.port, running: !!server?.listening }),
+      }).then(async connection => ({ ...await status(), connection }));
       if (method === 'cancelLogin') { loginController?.abort(); auth.cancelSignIn(); return Promise.resolve(signingIn).catch(() => {}).then(status); }
       if (method === 'login') {
         if (!signingIn) {

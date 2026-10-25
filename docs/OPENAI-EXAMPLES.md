@@ -5,11 +5,13 @@
 `model` 必须填写 `/v1/models` 返回的准确 ID，例如 `gpt-6.1-sol`。OpenAI 路径原样转发 ID，不解析显示名称、Claude 别名或 `[1M]` 后缀，也不使用主页的 Claude Code 默认模型替换它。
 
 ```python
-from openai import OpenAI
+from openai import OpenAI, DefaultHttpxClient
 
 client = OpenAI(
     base_url="http://127.0.0.1:17863/v1",
     api_key="粘贴主页的本地 API 密钥",
+    http_client=DefaultHttpxClient(trust_env=False, follow_redirects=False),
+    max_retries=0,
 )
 reply = client.chat.completions.create(
     model="gpt-6.1-sol",
@@ -20,6 +22,14 @@ print(reply.choices[0].message.content)
 ```
 
 先安装依赖：`pip install openai`。主页示例会随实际服务地址、模型与支持档位更新。
+
+这段聊天代码会发送提示词并使用订阅额度；只想检查连接时，请使用软件中的连接测试按钮。
+
+### 代理与 502 排查
+
+连接分为两段：Python → 本机服务 → ChatGPT。示例中的 `trust_env=False` 让 Python 直接连接本机服务，避免 `HTTP_PROXY`、`HTTPS_PROXY` 或 `ALL_PROXY` 将 `127.0.0.1` 的请求转送到外部代理。`follow_redirects=False` 阻止本地响应通过重定向将聊天正文发送到其他地址。`max_retries=0` 关闭 SDK 自动重试，便于看到原始错误。
+
+本机服务访问 ChatGPT 所需的 HTTP/HTTPS 代理，应在软件的“设置 → 网络代理”中保存，再测试连接。Python 中关闭环境代理不会关闭软件设置的上游代理。如果其他客户端必须保留环境代理，可为其设置 `NO_PROXY=127.0.0.1,localhost`，并确认客户端支持该变量。若仍返回 502，请查看响应正文以及连接测试结果：上游不可达、代理未启动或模型请求失败都可能返回 502，不能仅凭状态码判断原因。
 
 ## 思考强度
 

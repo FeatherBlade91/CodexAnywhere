@@ -33,6 +33,43 @@ test('status and cancellation remain usable while sign-in is pending', async()=>
   assert.equal((await f.service.invoke('status')).session.status,'connecting');
   assert.equal((await f.service.invoke('cancelLogin')).session.status,'disconnected'); await rejected;
 });
+
+test('connection diagnostics inspect the current local listener without login or model generation', async t => {
+  const config = { port: 0, localKey: 'private-key', proxy: 'http://127.0.0.1:7890' };
+  const observed = [];
+  const service = createDesktopService({ config, saveConfig: async () => {},
+    client: { getSession: async () => ({ status: 'disconnected' }), cancelSignIn() {}, signIn: () => assert.fail('diagnostics must not sign in') },
+    models: () => assert.fail('diagnostics must not request models through the account'),
+    createServer: () => createServer(),
+    testConnection: async options => {
+      assert.equal(options.proxy, config.proxy);
+      assert.equal('apiKey' in options, false);
+      return { ok: true, generationTested: false, localBridge: await options.inspectBridge() };
+    },
+    inspectLocalBridge: async state => { observed.push(state); return { ok: state.running }; },
+  });
+  t.after(() => service.invoke('stop'));
+  assert.equal((await service.invoke('testConnection')).connection.localBridge.ok, false);
+  await service.invoke('start');
+  const result = await service.invoke('testConnection');
+  assert.equal(result.connection.localBridge.ok, true);
+  assert.deepEqual(observed, [{ port: 0, running: false }, { port: result.port, running: true }]);
+});
+
+test('failed proxy save restores the previous configured and active route', async () => {
+  const previous = 'http://127.0.0.1:7890';
+  const config = { port: 0, proxy: previous };
+  const applied = [];
+  const service = createDesktopService({ config,
+    client: { getSession: async () => ({ status: 'disconnected' }) },
+    applyProxy: value => applied.push(value),
+    saveConfig: async () => { throw new Error('Cannot save settings'); },
+  });
+  await assert.rejects(service.invoke('setProxy', { proxy: '' }), /Cannot save settings/);
+  assert.equal(config.proxy, previous);
+  assert.deepEqual(applied, ['', previous]);
+  assert.equal((await service.invoke('status')).proxy, previous);
+});
 test('start and stop are idempotent and serialize concurrent requests', async()=>{
   const f=fixture();
   const results=await Promise.all([f.service.invoke('start'),f.service.invoke('start'),f.service.invoke('stop')]);

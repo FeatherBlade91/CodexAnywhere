@@ -3,6 +3,8 @@ import { createConnection } from 'node:net';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { get } from 'node:http';
+import { Agent, ProxyAgent } from 'undici';
 
 const networkCodes = new Set(['ECONNREFUSED', 'ECONNRESET', 'ENOTFOUND', 'EAI_AGAIN', 'ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_SOCKET', 'CERT_HAS_EXPIRED', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE']);
 
@@ -65,29 +67,61 @@ export async function inspectClaudeRoute({ home = process.env.CHATGPT_BRIDGE_HOM
   }
 }
 
-export async function testConnection({ proxy = '', fetcher = fetch, probe = testProxySocket, inspectRoute } = {}) {
+// node:http connects to loopback directly, even when upstream fetch uses a proxy.
+// This endpoint neither authenticates with OpenAI nor invokes a model.
+export function inspectLocalBridge({ port, running }, timeoutMs = 3000) {
+  const target = `127.0.0.1:${port}`;
+  if (!running) return Promise.resolve({ ok: false, target, code: 'service_stopped', message: t('本地服务尚未启动，请先启动服务再测试。') });
+  return new Promise(resolve => {
+    const request = get({ hostname: '127.0.0.1', port, path: '/health', agent: false, signal: AbortSignal.timeout(timeoutMs) }, response => {
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => {
+        body += chunk;
+        if (body.length > 16384) request.destroy(new Error('Invalid health response'));
+      });
+      response.on('end', () => {
+        let health;
+        try { health = JSON.parse(body); } catch {}
+        const ok = response.statusCode === 200 && health?.service === 'chatgpt-desktop';
+        resolve({ ok, target, status: response.statusCode, ...(ok ? {} : { code: 'invalid_health', message: t('本地地址未返回有效的服务状态，请重新启动服务。') }) });
+      });
+      response.on('error', () => resolve({ ok: false, target, code: 'local_connection_error', message: t('本地服务连接中断，请重新启动服务。') }));
+    });
+    request.on('error', error => resolve({ ok: false, target, code: networkCode(error) || 'local_connection_error', message: t('无法连接本地服务，请重新启动服务并检查端口。') }));
+  });
+}
+
+export async function testConnection({ proxy = '', fetcher = fetch, probe = testProxySocket, inspectRoute, inspectBridge,
+  createDispatcher = value => value ? new ProxyAgent(value) : new Agent(),
+} = {}) {
+  const localBridge = inspectBridge ? await inspectBridge() : undefined;
   if (proxy) {
     try { await probe(proxy); }
-    catch (error) { return { ok: false, message: connectionMessage(error, { proxy, proxyFailed: true }), target: proxyTarget(proxy).label, code: networkCode(error) || 'network_error' }; }
+    catch (error) { return { ok: false, networkOk: false, generationTested: false, ...(localBridge ? { localBridge } : {}), message: connectionMessage(error, { proxy, proxyFailed: true }), target: proxyTarget(proxy).label, code: networkCode(error) || 'network_error' }; }
   }
   const targets = ['https://auth.openai.com/.well-known/openid-configuration', 'https://api.openai.com/v1/models'];
-  const checks = await Promise.all(targets.map(async url => {
+  // Own the route for this diagnostic: changing settings concurrently must not
+  // redirect an in-flight test or turn an explicit proxy test into a direct one.
+  const dispatcher = createDispatcher(proxy);
+  let checks;
+  try { checks = await Promise.all(targets.map(async url => {
     const host = new URL(url).hostname;
     try {
-      const response = await fetcher(url, { redirect: 'error', signal: AbortSignal.timeout(10000) });
+      const response = await fetcher(url, { method: 'GET', dispatcher, redirect: 'error', signal: AbortSignal.timeout(10000) });
       await response.body?.cancel();
       // The models endpoint deliberately receives no credentials: HTTP 401 proves reachability.
-      if (response.status === 200 || (host === 'api.openai.com' && response.status === 401)) return { ok: true, host, status: response.status };
+      if (response.status === 200 || (host === 'api.openai.com' && response.status === 401)) return { ok: true, host, status: response.status, authenticated: false, scope: 'reachability' };
       return { ok: false, host, status: response.status, message: t('{host} 返回 HTTP {status}，请检查代理出口和访问规则。', { host, status: response.status }) };
     } catch (error) { return { ok: false, host, code: networkCode(error) || 'network_error', message: connectionMessage(error, { proxy, host }) }; }
-  }));
+  })); } finally { await dispatcher.close(); }
   const failed = checks.find(check => !check.ok);
   const localRoute = inspectRoute ? await inspectRoute() : undefined;
   const networkOk = !failed;
-  const message = failed?.message || (localRoute?.ok === false
-    ? `${t('ChatGPT 登录和 API 地址均可连接。')}${localRoute.message}`
-    : t('ChatGPT 登录和 API 地址均可连接。'));
-  return { ok: networkOk && localRoute?.ok !== false, networkOk, message, target: proxy ? proxyTarget(proxy).label : 'direct', checks, ...(localRoute ? { localRoute } : {}) };
+  const message = failed?.message || (localBridge?.ok === false ? localBridge.message : undefined) || (localRoute?.ok === false
+    ? `${t('登录与 API 网络可达；未验证账号权限或模型生成能力。')}${localRoute.message}`
+    : t('登录与 API 网络可达；未验证账号权限或模型生成能力。'));
+  return { ok: networkOk && localRoute?.ok !== false && localBridge?.ok !== false, networkOk, generationTested: false, message, target: proxy ? proxyTarget(proxy).label : 'direct', checks, ...(localRoute ? { localRoute } : {}), ...(localBridge ? { localBridge } : {}) };
 }
 
 export async function explainConnectionError(error, proxy, probe = testProxySocket) {
