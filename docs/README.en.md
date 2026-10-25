@@ -77,7 +77,7 @@ All endpoints use the same local service and credentials. The default address is
 
 ## Upgrade and troubleshoot
 
-Quit the old Bridge/Gateway manager and stop its service before opening the desktop app. Existing data stays in place: the app reuses `%LOCALAPPDATA%\ChatGPTClaudeBridge` first, then `%LOCALAPPDATA%\ChatGPTGateway` if no Bridge directory exists. A fresh installation uses `%LOCALAPPDATA%\ChatGPTBridge`. When both legacy directories exist, Bridge takes precedence; credentials are not merged or copied.
+Application data is stored in `%LOCALAPPDATA%\CodexAnywhere`.
 
 If Claude Code reports `ECONNREFUSED`, check the address in the error. CC Switch may point Claude Code at `127.0.0.1:15721`; that proxy can be offline even while Codex-Anywhere on `17863` is healthy. Start CC Switch and its proxy, or explicitly choose direct Claude Code configuration in the desktop app.
 

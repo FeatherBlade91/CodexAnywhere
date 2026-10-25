@@ -73,7 +73,7 @@ Model      使用 GET /v1/models 返回的模型 ID
 
 ## 升级与排查
 
-升级前先退出旧版 Bridge/Gateway 管理器并停止旧服务。已有数据保留原位置：优先沿用 `%LOCALAPPDATA%\ChatGPTClaudeBridge`；不存在时沿用 `%LOCALAPPDATA%\ChatGPTGateway`；全新安装使用 `%LOCALAPPDATA%\ChatGPTBridge`。两个旧目录都存在时优先使用 Bridge，不合并或复制凭据。
+应用数据存储在 `%LOCALAPPDATA%\CodexAnywhere`。
 
 Claude Code 出现 `ECONNREFUSED` 时，先看报错中的地址。CC Switch 可能让 Claude Code 连接 `127.0.0.1:15721`；即使 Bridge 的 `17863` 服务正常，这个代理也可能没有启动。打开 CC Switch 并启动代理，或在桌面应用中主动选择“配置 Claude Code”使用直连。
 

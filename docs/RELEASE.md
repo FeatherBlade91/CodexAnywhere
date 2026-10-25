@@ -19,7 +19,7 @@
 
 安装包尚未代码签名，可使用附带的 SHA-256 校验文件核对。卸载保留本地授权与配置；若需撤销 Claude Code 接入，请先在应用中点击“恢复原配置”。
 
-旧数据保留原目录，依次选用 `%LOCALAPPDATA%\ChatGPTClaudeBridge`、`%LOCALAPPDATA%\ChatGPTGateway`；全新安装使用 `%LOCALAPPDATA%\ChatGPTBridge`。不会复制或合并两套凭据。
+应用数据存储在 `%LOCALAPPDATA%\CodexAnywhere`。
 
 如果 Claude Code 报 `ECONNREFUSED 127.0.0.1:15721`，请启动 CC Switch 及其代理，或主动配置 Claude Code 直连。该错误与 Bridge 的 `17863` 服务是否正常是两个独立检查项。
 

@@ -1,7 +1,6 @@
 import { app, BrowserWindow, ipcMain, clipboard, shell, utilityProcess, dialog, Tray, Menu } from 'electron';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { existsSync } from 'node:fs';
 import { loadLanguage, saveLanguage } from './language.mjs';
 import { translator } from './renderer/i18n.js';
 
@@ -26,19 +25,9 @@ function request(method, args) {
 
 function startWorker() {
   const local = process.env.LOCALAPPDATA || app.getPath('userData');
-  let stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR;
-  let appId = 'chatgpt-bridge';
-  let appName = 'Codex-Anywhere';
-  // Keep legacy auth IDs and storage paths so existing grants and settings remain usable.
-  if (!stateDir) {
-    if (existsSync(join(local, 'ChatGPTClaudeBridge', 'bridge.json'))) {
-      stateDir = join(local, 'ChatGPTClaudeBridge');
-      appId = 'chatgpt-claude-bridge'; appName = 'Codex-Anywhere';
-    } else if (existsSync(join(local, 'ChatGPTGateway', 'bridge.json'))) {
-      stateDir = join(local, 'ChatGPTGateway');
-      appId = 'chatgpt-api-gateway'; appName = 'Codex-Anywhere';
-    } else stateDir = join(local, 'ChatGPTBridge');
-  }
+  const stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR || join(local, 'CodexAnywhere');
+  const appId = 'chatgpt-claude-bridge';
+  const appName = 'Codex-Anywhere';
   worker = utilityProcess.fork(join(here, 'worker.mjs'), [], {
     serviceName: 'Codex-Anywhere service', stdio: 'pipe',
     env: { ...process.env, CHATGPT_BRIDGE_STATE_DIR: stateDir, CHATGPT_BRIDGE_APP_ID: appId, CHATGPT_BRIDGE_APP_NAME: appName, CHATGPT_BRIDGE_LANGUAGE: locale.language },

@@ -77,7 +77,7 @@ Model      使用 GET /v1/models 傳回的模型 ID
 
 ## 升級與排查
 
-升級前先退出舊版 Bridge/Gateway 管理員並停止舊服務。既有資料保留原位置：優先沿用 `%LOCALAPPDATA%\ChatGPTClaudeBridge`；不存在時沿用 `%LOCALAPPDATA%\ChatGPTGateway`；全新安裝使用 `%LOCALAPPDATA%\ChatGPTBridge`。兩個舊目錄都存在時優先使用 Bridge，不合併或複製憑證。
+應用程式資料儲存在 `%LOCALAPPDATA%\CodexAnywhere`。
 
 Claude Code 出現 `ECONNREFUSED` 時，先查看錯誤中的位址。CC Switch 可能讓 Claude Code 連接 `127.0.0.1:15721`；即使 Bridge 的 `17863` 服務正常，這個 Proxy 也可能尚未啟動。開啟 CC Switch 並啟動 Proxy，或在桌面應用程式中主動選擇「配置 Claude Code」使用直接連線。
 

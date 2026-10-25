@@ -8,7 +8,7 @@ import { Agent, ProxyAgent, setGlobalDispatcher } from 'undici';
 import { createChatGPT } from '../../vendor/siwc/index.js';
 
 export const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
-export const stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR || join(process.env.LOCALAPPDATA || join(homedir(), '.local', 'share'), 'ChatGPTClaudeBridge');
+export const stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR || join(process.env.LOCALAPPDATA || join(homedir(), '.local', 'share'), 'CodexAnywhere');
 await mkdir(stateDir, { recursive: true });
 export const configPath = join(stateDir, 'bridge.json');
 let config;

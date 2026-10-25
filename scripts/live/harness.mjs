@@ -12,7 +12,7 @@ const cliRoot = process.env.DSH_CLI_ROOT || join(process.env.APPDATA, 'npm/node_
 const require = createRequire(join(cliRoot, 'package.json'));
 const YAML = require('yaml');
 const home = process.env.DSH_HOME || join(homedir(), '.dsh');
-const state = process.env.CHATGPT_BRIDGE_STATE_DIR || join(process.env.LOCALAPPDATA, 'ChatGPTClaudeBridge');
+const state = process.env.CHATGPT_BRIDGE_STATE_DIR || join(process.env.LOCALAPPDATA, 'CodexAnywhere');
 const config = JSON.parse(await readFile(join(state, 'bridge.json'), 'utf8'));
 const desktop = YAML.parse(await readFile(join(home, 'profiles/desktop/cordis.patch.yml'), 'utf8'));
 const provider = desktop.find(r => r.id === 'llm-pi-ai').config.providers['codex-anywhere'];

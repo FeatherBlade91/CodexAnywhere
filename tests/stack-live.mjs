@@ -11,7 +11,7 @@ const r=await fetch(cfg.env.ANTHROPIC_BASE_URL.replace(/\/$/,'')+'/v1/messages',
 const raw=await r.text();
 const events=raw.split(/\r?\n/).filter(l=>l.startsWith('data: ')).flatMap(l=>{try{return[JSON.parse(l.slice(6))]}catch{return[]}});
 const body={model:events.find(e=>e.type==='message_start')?.message.model,content:[{type:'text',text:events.filter(e=>e.type==='content_block_delta'&&e.delta?.type==='text_delta').map(e=>e.delta.text).join('')}],error:events.find(e=>e.type==='error')};
-const logs=(await readFile(join(process.env.LOCALAPPDATA,'ChatGPTClaudeBridge/server.log'),'utf8')).split(/\r?\n/).flatMap(l=>{try{return[JSON.parse(l)]}catch{return[]}}).filter(l=>l.time>=start);
+const logs=(await readFile(join(process.env.LOCALAPPDATA,'CodexAnywhere/server.log'),'utf8')).split(/\r?\n/).flatMap(l=>{try{return[JSON.parse(l)]}catch{return[]}}).filter(l=>l.time>=start);
 const report={start,status:r.status,requested:encoded,responseModel:body.model,text:body.content?.filter(x=>x.type==='text').map(x=>x.text).join(''),error:body.error,logs:logs.map(({model,requestedEffort,confirmedEffort,result})=>({model,requestedEffort,confirmedEffort,result}))};
 report.passed=r.ok&&report.text?.includes('STACK_LUNA_OK')&&logs.some(l=>l.model==='gpt-6-luna'&&l.confirmedEffort==='low');
 await writeFile(new URL('../test-results/stack-live.json',import.meta.url),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(!report.passed)process.exitCode=1;
