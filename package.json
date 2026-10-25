@@ -38,6 +38,9 @@
       "output": "dist"
     },
     "asar": true,
+    "extraResources": [
+      { "from": "src/desktop/assets/icon.ico", "to": "app-icon.ico" }
+    ],
     "asarUnpack": [
       "src/core/dpapi.ps1"
     ],

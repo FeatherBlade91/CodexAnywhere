@@ -1,3 +1,17 @@
+!macro customInstall
+  ; A standalone icon path avoids stale executable-icon cache entries on upgrade.
+  ${If} ${FileExists} "$newDesktopLink"
+    CreateShortCut "$newDesktopLink" "$appExe" "" "$INSTDIR\resources\app-icon.ico" 0 "" "" "${APP_DESCRIPTION}"
+    WinShell::SetLnkAUMI "$newDesktopLink" "${APP_ID}"
+  ${EndIf}
+  ${If} ${FileExists} "$newStartMenuLink"
+    CreateShortCut "$newStartMenuLink" "$appExe" "" "$INSTDIR\resources\app-icon.ico" 0 "" "" "${APP_DESCRIPTION}"
+    WinShell::SetLnkAUMI "$newStartMenuLink" "${APP_ID}"
+  ${EndIf}
+  WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon" "$INSTDIR\resources\app-icon.ico"
+  System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
+!macroend
+
 !macro customUnInstall
   ; Upgrades run the old uninstaller with --updated /KEEP_APP_DATA.
   ; Never disconnect clients or remove credentials during an upgrade.
