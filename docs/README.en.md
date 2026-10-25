@@ -4,7 +4,7 @@
 
 [简体中文](../README.md) · [繁體中文](README.zh-TW.md) · [English](README.en.md)
 
-**Use your ChatGPT subscription through a local API key.**
+**Use your ChatGPT subscription through a local API key**
 
 [Download for Windows](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [Usage guide](USER-GUIDE.txt) · [Contributing](CONTRIBUTING.md)
 
@@ -14,26 +14,13 @@
 
 </div>
 
-**v1.0.4:** Faster credential acquisition and background model discovery reduce local inference overhead; see [measurements](PERFORMANCE.md). The guide can refresh the full model ID list and copy Python examples. API keys support manual rotation or automatic rotation every hour, day, or week, disabled by default. After rotation, update client keys or reconnect your apps.
-
-Normal uninstall restores managed client settings and removes this app’s local data. Upgrades preserve accounts and configuration.
-
 ![Codex-Anywhere desktop showing ChatGPT sign-in and OpenAI and Claude Code connection controls](assets/desktop.png)
 
-*Actual Electron window before sign-in, captured with isolated test data and a masked key. The temporary test port shown differs from the default `17863`.*
+Sign in and start the local service to access your ChatGPT subscription quota using an API key.
 
-Codex-Anywhere brings the former **Plan Bridge** and **API Gateway** together in one standalone Electron application. Sign in once, start one local service, and connect Claude Code or applications that accept an OpenAI-compatible API. Desktop installers are the only release format.
+Fully official, with no risk of violations. Without the extra context added by Codex, it delivers the same experience as a clean pay-as-you-go API key while using your ChatGPT subscription quota directly.
 
-The app uses OpenAI's Sign in with ChatGPT Devkit. Eligible accounts can authorize requests against their ChatGPT plan allowance through this [documented integration](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt). It does not reverse-proxy the ChatGPT website or reuse browser cookies. The bridge translates client requests locally; its API key secures that local service and is not an OpenAI platform API key.
-
-Use remains subject to account eligibility, plan limits, OpenAI's terms, and the Devkit's noncommercial license. This integration does not establish blanket compliance for every use or guarantee that an account cannot be suspended; OpenAI's [Terms of Use](https://openai.com/policies/terms-of-use/) still apply.
-
-```mermaid
-flowchart RL
-    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere desktop]
-    A[OpenAI-compatible apps] -->|Chat Completions / Responses| B
-    B -->|One account · one local service| S[ChatGPT subscription models]
-```
+The app uses OpenAI's Sign in with ChatGPT Devkit through the [officially documented authorization method](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt), allowing eligible accounts to use their own ChatGPT plan allowance. It does not reverse-proxy the ChatGPT website or reuse browser cookies; it simply runs a local service to translate client requests.
 
 ## Get connected
 
@@ -56,7 +43,7 @@ Closing the window hides the app to the system tray and keeps the local service 
 | Adjust your setup | Set a proxy or launch the app when you sign in to Windows. |
 | Undo client configuration | Restore the backed-up settings through the integration controls. |
 
-Client configuration changes are explicit. Backups protect existing settings; restoration preserves unrelated changes where possible. Restart Claude Code after changing its connection. For CC Switch, select the configured provider in CC Switch.
+Client configuration changes are explicit. Backups protect existing settings; restoration preserves unrelated changes where possible. The default model mappings are Haiku → `gpt-6-luna`, Sonnet → `gpt-6-sol`, Opus → `gpt-6.1-sol`, and Fable → `gpt-6-astra`; you can change them in Settings. Restart Claude Code after changing its connection or model mappings. For CC Switch, select the configured provider in CC Switch.
 
 The desktop app supports Simplified Chinese, Traditional Chinese, and English. On first launch it uses your preferred system language, falling back to English for other languages. Change it under **Settings → Display language**, or select **System default**. Confirming saves the choice and automatically restarts the app; canceling keeps the previous setting. Restarting stops the local service and interrupts active requests.
 
@@ -86,6 +73,8 @@ Application data is stored in `%LOCALAPPDATA%\CodexAnywhere`.
 If Claude Code reports `ECONNREFUSED`, check the address in the error. CC Switch may point Claude Code at `127.0.0.1:15721`; that proxy can be offline even while Codex-Anywhere on `17863` is healthy. Start CC Switch and its proxy, or explicitly choose direct Claude Code configuration in the desktop app.
 
 In **Settings**, save the proxy before clicking **Test connection**. This checks the saved proxy, authorization/API connectivity, and Claude Code's current local route. It does not send a model prompt or display credentials.
+
+Python examples explicitly bypass environment proxies to prevent local `127.0.0.1` requests from being routed through `HTTP_PROXY` / `ALL_PROXY` and returning 502 errors. Configure the upstream proxy for ChatGPT in Settings; other clients can set `NO_PROXY=127.0.0.1,localhost`. See [Proxy and 502 troubleshooting](OPENAI-EXAMPLES.md#代理与-502-排查). Chat examples consume quota; use the connection test to check networking only.
 
 ## What to know
 

@@ -4,7 +4,7 @@
 
 [简体中文](README.md) · [繁體中文](docs/README.zh-TW.md) · [English](docs/README.en.md)
 
-**通过本地 API Key 使用 ChatGPT 订阅额度。**
+**通过本地 API Key 使用 ChatGPT 订阅额度**
 
 [下载 Windows 桌面版](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [使用指南](docs/USER-GUIDE.txt) · [参与开发](docs/CONTRIBUTING.md)
 
@@ -14,26 +14,15 @@
 
 </div>
 
-**v1.0.4：** 优化 AI 请求前的凭据读取和模型列表刷新，详见[性能测量](docs/PERFORMANCE.md)。接入指南支持完整模型 ID 列表刷新和 Python 代码复制。API 密钥可手动刷新，或按 1 小时／1 天／7 天自动刷新，默认关闭；刷新后需更新客户端密钥或重新接入。
-
-正常卸载会恢复受管理的客户端接入配置并删除本软件的本地数据；升级安装保留账号与配置。
-
 ![Codex-Anywhere 桌面界面，包含 ChatGPT 登录、OpenAI 应用和 Claude Code 连接设置](docs/assets/desktop.png)
 
-*真实 Electron 未登录界面，使用隔离测试数据，密钥已遮蔽。截图为临时测试端口，默认端口为 `17863`。*
+登录，启动本地服务，即可利用 API Key 格式调用 ChatGPT 订阅额度。
 
-Codex-Anywhere 将原来的 **Plan Bridge** 和 **API Gateway** 合并为独立的 Electron 桌面软件。登录一次，启动一个本地服务，即可连接 Claude Code 或支持 OpenAI 兼容接口的应用。Release 只提供桌面安装包。
+完全官方，无违规风险。没有 Codex 附加的多余上下文，与纯净的按量付费 Key 效果一致，却直接使用 ChatGPT 订阅额度。
 
-软件使用 OpenAI 的 Sign in with ChatGPT Devkit，通过[官方文档介绍的授权方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，让符合条件的账号使用自己的 ChatGPT 套餐额度。它不反代 ChatGPT 网页，也不复用浏览器 Cookie。本地服务负责转换客户端请求；生成的 API Key 用于访问这个本地服务，并非 OpenAI 平台 API Key。
+软件使用 OpenAI 的 Sign in with ChatGPT Devkit，通过 [官方文档介绍的授权方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，让符合条件的账号使用自己的 ChatGPT 套餐额度。不反代 ChatGPT 网页，不复用浏览器 Cookie，只建立本地服务转换客户端请求。
 
-使用时仍须满足账号资格、套餐限制、OpenAI 条款和 Devkit 的非商业许可。采用官方授权方式不等于任何用途都完全合规，也不能保证零封号风险；具体使用须遵守 [OpenAI 使用条款](https://openai.com/policies/terms-of-use/)。
 
-```mermaid
-flowchart RL
-    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere 桌面版]
-    A[OpenAI 兼容应用] -->|Chat Completions / Responses| B
-    B -->|同一账号 · 同一本地服务| S[ChatGPT 订阅模型]
-```
 
 ## 开始使用
 
