@@ -14,6 +14,13 @@ test('macOS Keychain encrypts on disk and decrypts in a fresh utility process', 
   let desktop;
   try {
     desktop = await electron.launch({ ...options, env });
+    // Playwright enables a mock keychain by default. Remove its overrides before
+    // the first safeStorage call so this test exercises the native credential store.
+    assert.equal(await desktop.evaluate(({ app }) => {
+      app.commandLine.removeSwitch('use-mock-keychain');
+      app.commandLine.removeSwitch('password-store');
+      return app.commandLine.hasSwitch('use-mock-keychain') || app.commandLine.hasSwitch('password-store');
+    }), false);
     await (await desktop.firstWindow()).locator('#toggle-service:not([disabled])').waitFor();
     for (const write of [true, false]) {
       const result = await desktop.evaluate(async ({ app, utilityProcess, safeStorage }, { fixture, directory, write }) => {

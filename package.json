@@ -8,7 +8,7 @@
     "start": "npm run build && electron .",
     "dist": "npm run build && electron-builder --win nsis --x64 --publish never",
     "pack": "npm run build && electron-builder --win --dir --x64 --publish never",
-    "test": "node --test tests/protocol.test.mjs tests/integration.test.mjs tests/restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs tests/gateway.test.mjs tests/desktop-service.test.mjs tests/network.test.mjs tests/language.test.mjs tests/python-example.test.mjs tests/credential-performance.test.mjs tests/model-cache.test.mjs tests/key-rotation.test.mjs tests/platform.test.mjs tests/credential-channel.test.mjs tests/uninstall.test.mjs",
+    "test": "node --test tests/protocol.test.mjs tests/integration.test.mjs tests/restore-stack.test.mjs tests/response-accumulator.test.mjs tests/lifecycle.test.mjs tests/gateway.test.mjs tests/desktop-service.test.mjs tests/network.test.mjs tests/language.test.mjs tests/python-example.test.mjs tests/credential-performance.test.mjs tests/model-cache.test.mjs tests/key-rotation.test.mjs tests/platform.test.mjs tests/credential-channel.test.mjs tests/uninstall.test.mjs tests/worker-startup.test.mjs",
     "test:desktop": "node --test --test-concurrency=1 tests/desktop.e2e.mjs tests/language.e2e.mjs tests/language-restart.e2e.mjs tests/macos-credentials.e2e.mjs",
     "test:live": "node scripts/live/e2e.mjs",
     "dist:mac": "npm run build && electron-builder --mac dmg --publish never",

@@ -2,6 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { createSystem, parseMacProxy } from '../src/platform/system.mjs';
+import { execFileSync } from 'node:child_process';
+import { mkdtemp, rm, access } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+
+test('uninstall override applied after shell import is respected by core initialization', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'platform-late-state-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const selected = join(directory, 'selected');
+  const platformModule = new URL('../src/platform/system.mjs', import.meta.url).href;
+  const runtimeModule = new URL('../src/core/runtime.mjs', import.meta.url).href;
+  execFileSync(process.execPath, ['--input-type=module', '-e', `
+    await import(${JSON.stringify(platformModule)});
+    process.env.CHATGPT_BRIDGE_STATE_DIR = ${JSON.stringify(selected)};
+    const { stateDir } = await import(${JSON.stringify(runtimeModule)});
+    if (stateDir !== process.env.CHATGPT_BRIDGE_STATE_DIR) process.exit(1);
+  `], { env: { ...process.env, CHATGPT_BRIDGE_STATE_DIR: join(directory, 'original'), HTTPS_PROXY: '', HTTP_PROXY: '' }, stdio: 'pipe' });
+  await access(join(selected, 'bridge.json'));
+  await assert.rejects(access(join(directory, 'original', 'bridge.json')), { code: 'ENOENT' });
+});
 
 test('platform paths work without Windows environment and honor isolation', () => {
   const mac = createSystem({ platform: 'darwin', env: {}, home: '/Users/test' });
