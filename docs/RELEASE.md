@@ -1,4 +1,4 @@
-# Codex-Anywhere 1.0.1
+# Codex-Anywhere 1.0.2
 
 一个独立的 Electron 桌面应用，统一原来的 Plan Bridge 和 API Gateway。
 
@@ -15,10 +15,11 @@
 - 代理或服务状态变化时清除旧检测结果，避免误报。
 - 安装包内置运行环境。
 
-下载 `Codex-Anywhere-Setup-1.0.1-x64.exe`，适用于 Windows 10/11 x64。先退出旧版 Bridge/Gateway，以免占用端口。旧 Bridge 配置优先沿用，其次沿用 Gateway 配置；若两者都存在，使用 Bridge 的授权。账户权限和额度由上游决定。
+下载 `Codex-Anywhere-Setup-1.0.2-x64.exe`，适用于 Windows 10/11 x64。先退出旧版 Bridge/Gateway，以免占用端口。旧 Bridge 配置优先沿用，其次沿用 Gateway 配置；若两者都存在，使用 Bridge 的授权。账户权限和额度由上游决定。
 
 安装包尚未代码签名，可使用附带的 SHA-256 校验文件核对。卸载保留本地授权与配置；若需撤销 Claude Code 接入，请先在应用中点击“恢复原配置”。
 
 旧数据保留原目录，依次选用 `%LOCALAPPDATA%\ChatGPTClaudeBridge`、`%LOCALAPPDATA%\ChatGPTGateway`；全新安装使用 `%LOCALAPPDATA%\ChatGPTBridge`。不会复制或合并两套凭据。
 
 如果 Claude Code 报 `ECONNREFUSED 127.0.0.1:15721`，请启动 CC Switch 及其代理，或主动配置 Claude Code 直连。该错误与 Bridge 的 `17863` 服务是否正常是两个独立检查项。
+
