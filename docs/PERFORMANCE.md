@@ -12,7 +12,7 @@ Local lock contenders use a cancellable FIFO queue. The filesystem lock remains 
 
 ## Model discovery
 
-The first lookup still waits for a successful model catalog. For the next 60 seconds the cache is fresh. An older successful catalog is returned immediately while one background refresh runs, up to a one-hour age limit. Failed background refreshes retain the previous catalog and back off for 10 seconds. Explicit refreshes and unknown model IDs await discovery and expose failures. Logout/login clears the cache, and results from older generations cannot overwrite the current catalog. Model HTTP discovery has a 15-second timeout. The previously write-only `models.json` is no longer written on the request path.
+The first lookup still waits for a successful model catalog. For the next 60 seconds the cache is fresh. An older successful catalog is returned immediately while one background refresh runs, up to a one-hour age limit. Failed background refreshes retain the previous catalog and back off for 10 seconds. Explicit refreshes and unknown model IDs await discovery and expose failures. Logout/login clears the cache, and results from older generations cannot overwrite the current catalog. Model HTTP discovery has a 15-second timeout. The UI's `models.json` snapshot is persisted atomically in a background queue; inference never waits for disk persistence, and disk errors do not fail generation.
 
 ## Reproducible offline measurement
 

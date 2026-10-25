@@ -1,5 +1,8 @@
 import { resolveModelId } from './model-mapping.mjs';
-import { client, config } from './runtime.mjs';
+import { client, config, stateDir } from './runtime.mjs';
+import { writeFile, rename, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { createModelCache } from './model-cache.mjs';
 import { EFFORT_LEVELS } from './protocol.mjs';
 const cache = createModelCache(() => client.withAccessToken(async (token, signal) => {
@@ -17,7 +20,13 @@ const cache = createModelCache(() => client.withAccessToken(async (token, signal
     }));
     if (!result.length) throw new Error('No models available for this ChatGPT account.');
     return result;
-  }));
+  }), { onUpdate: async ({ value, time }) => {
+    const temporary = join(stateDir, `.models-${randomUUID()}.tmp`);
+    try {
+      await writeFile(temporary, JSON.stringify({ time, models: value }), { mode: 0o600 });
+      await rename(temporary, join(stateDir, 'models.json'));
+    } finally { await rm(temporary, { force: true }); }
+  } });
 export function clearModels() { cache.clear(); }
 export function models(refresh = false) { return cache.get(refresh); }
 export async function selectModel(requested) {

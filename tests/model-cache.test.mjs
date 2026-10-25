@@ -31,3 +31,29 @@ test('clearing during refresh cannot repopulate catalog or clobber a newer pendi
   assert.deepEqual(await b, ['new-account']); assert.deepEqual(await c, ['new-account']);
   assert.equal(calls, 2); assert.deepEqual(await cache.get(), ['new-account']);
 });
+
+test('slow or failed UI persistence never blocks inference and newer snapshots win', async () => {
+  const gate = Promise.withResolvers(); let loads = 0; const saved = [];
+  const cache = createModelCache(async () => [++loads], { onUpdate: async ({ value }) => {
+    if (value[0] === 1) await gate.promise;
+    saved.push(value[0]);
+    if (value[0] === 1) throw Error('disk failure');
+  } });
+  assert.deepEqual(await cache.get(), [1]);
+  assert.deepEqual(await cache.get(true), [2]);
+  assert.deepEqual(await cache.get(), [2]);
+  assert.deepEqual(saved, []);
+  gate.resolve(); await tick();
+  assert.deepEqual(saved, [1, 2]);
+});
+
+test('clearing a catalog discards queued persistence from the old generation', async () => {
+  const gate = Promise.withResolvers(); let loads = 0; const saved = [];
+  const cache = createModelCache(async () => [++loads], { onUpdate: async ({ value }) => {
+    if (value[0] === 1) await gate.promise;
+    saved.push(value[0]);
+  } });
+  await cache.get(); await cache.get(true); cache.clear(); await cache.get();
+  gate.resolve(); await tick();
+  assert.deepEqual(saved, [1, 3]);
+});
