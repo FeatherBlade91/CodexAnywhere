@@ -10,7 +10,7 @@ import { apiError, ChatGPTError, fetchRemote } from '../../vendor/siwc/errors.js
 
 export function createBridgeServer() {
 const reasoningCache = new Map();
-const gateway = createGateway({ apiKey: config.localKey, client, autoLogin: false, listModels: () => models(), request: async (payload, token, signal) => {
+const gateway = createGateway({ apiKey: () => config.localKey, client, autoLogin: false, listModels: () => models(), request: async (payload, token, signal) => {
   const response = await fetchRemote('https://api.openai.com/v1/responses', { method: 'POST', redirect: 'error', signal, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', accept: 'text/event-stream' }, body: JSON.stringify(payload) }, 600_000);
   if (!response.ok) throw apiError(await response.json().catch(() => ({})), response.status, response.headers.get('x-request-id'));
   return response;

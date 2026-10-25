@@ -22,7 +22,8 @@ export function createGateway({ apiKey, client, request, listModels, autoLogin =
     const path = new URL(req.url, 'http://localhost').pathname;
     if (req.method === 'GET' && path === '/health') return json(res, 200, { service: 'chatgpt-openai-gateway', status: 'ok' });
     const key = req.headers.authorization?.replace(/^Bearer /i, '') || req.headers['x-api-key'] || '';
-    if (!apiKey || !timingSafeEqual(hash(key), hash(apiKey))) return json(res, 401, { error: { message: 'Invalid API key', type: 'authentication_error', code: 'invalid_api_key', param: null } });
+    const currentKey = typeof apiKey === 'function' ? apiKey() : apiKey;
+    if (!currentKey || !timingSafeEqual(hash(key), hash(currentKey))) return json(res, 401, { error: { message: 'Invalid API key', type: 'authentication_error', code: 'invalid_api_key', param: null } });
     if (path === '/admin/shutdown' && req.method === 'POST') {
       json(res, 202, { status: 'draining' });
       client.cancelSignIn?.();

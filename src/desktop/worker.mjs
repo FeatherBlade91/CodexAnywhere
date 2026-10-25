@@ -7,3 +7,14 @@ port.on('message', async ({ data }) => {
   try { port.postMessage({ id, result: await service.invoke(method, args) }); }
   catch (error) { port.postMessage({ id, error: error.message || 'Desktop operation failed.' }); }
 });
+
+// Check in the worker so rotation continues when the window is hidden or suspended.
+let checkingRotation = false;
+async function checkRotation() {
+  if (checkingRotation) return;
+  checkingRotation = true;
+  try { await service.invoke('checkKeyRotation'); } catch { /* Retry on the next tick; never log keys. */ }
+  finally { checkingRotation = false; }
+}
+await checkRotation();
+setInterval(checkRotation, 30000).unref();

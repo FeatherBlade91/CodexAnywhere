@@ -1,3 +1,4 @@
+import { pythonExample, highlightPython } from './python-example.js';
 import { translator, localizeDocument } from './i18n.js';
 const locale = await window.bridge.invoke('getLanguage');
 const t = translator(locale.language);
@@ -25,6 +26,8 @@ function render() {
   $('login').hidden = loggedIn || loggingIn; $('cancel-login').hidden = !loggingIn; $('logout').hidden = !loggedIn;
   $('route-proxy').textContent = state.proxy ? t('通过已保存代理') : t('直连上游');
   $('base-url').value = state.baseURL || ''; $('anthropic-url').value = state.anthropicURL || ''; $('api-key').value = state.apiKey || '';
+  $('key-rotation').value = String(state.keyRotationHours || 0);
+  $('key-reconnect').hidden = !state.integrationNeedsReconnect;
   const integration = state.integration; $('integration-state').textContent = typeof integration === 'string' && integration ? ({direct:t('已配置 Claude Code'),'cc-switch':t('已添加到 CC Switch'),none:t('尚未配置')}[integration] || integration) : integration?.mode ? t('已配置 {name}', { name: integration.mode === 'direct' ? 'Claude Code' : 'CC Switch' }) : t('尚未配置');
   if (document.activeElement !== $('proxy') && !$('proxy').dataset.dirty) $('proxy').value = state.proxy || '';
   $('launch-at-login').checked = Boolean(state.launchAtLogin); $('state-dir').textContent = state.stateDir || ''; $('version').textContent = state.version ? t('版本 {version}', { version: state.version }) : t('桌面版');
@@ -41,6 +44,7 @@ function renderModels() {
   const signature = JSON.stringify(availableModels);
   if (signature === modelsSignature) return;
   modelsSignature = signature;
+  renderGuideModels();
   $('mapping-models').replaceChildren(...availableModels.map(model => Object.assign(document.createElement('option'), { value: model.slug })));
 }
 async function refresh() { const next = await api('status'); if (next) { state = next; render(); } }
@@ -113,23 +117,40 @@ $('language').addEventListener('change', async () => {
 });
 
 function renderExample() {
-  const model = availableModels.find(m => (m.slug || m.id) === state.model) || availableModels[0];
-  const slug = model?.slug || model?.id || state.model || 'gpt-6.1-sol';
-  const effort = model?.efforts?.includes('high') ? 'high' : model?.efforts?.[0] || 'high';
-  $('example-model').value = slug;
-  $('example-efforts').textContent = model?.efforts?.length ? t('{model} 当前目录支持：{efforts}。', { model: slug, efforts: model.efforts.join(', ') }) : t('登录并刷新模型后，这里显示示例模型支持的强度。');
-  $('python-example').textContent = `from openai import OpenAI, DefaultHttpxClient
-
-client = OpenAI(
-    base_url=${JSON.stringify(state.baseURL || 'http://127.0.0.1:17863/v1')},
-    api_key=${JSON.stringify(t('粘贴上方本地 API 密钥'))},
-    http_client=DefaultHttpxClient(trust_env=False, follow_redirects=False),
-    max_retries=0,
-)
-reply = client.chat.completions.create(
-    model=${JSON.stringify(slug)},
-    messages=[{"role": "user", "content": "Hello"}],
-    reasoning_effort=${JSON.stringify(effort)},
-)
-print(reply.choices[0].message.content)`;
+  $('guide-base-url').textContent = state.baseURL || 'http://127.0.0.1:17863/v1';
+  const source = pythonExample(state.baseURL, t('粘贴上方本地 API 密钥'));
+  if ($('python-example').textContent !== source) highlightPython($('python-example'), source);
 }
+function renderGuideModels() {
+  const list = $('guide-models');
+  list.replaceChildren();
+  const ids = [...new Set(availableModels.map(m => m.slug).filter(Boolean))];
+  if (!ids.length) {
+    list.textContent = t('登录后点击「获取最新模型ID」，查看账号完整模型列表。');
+    return;
+  }
+  for (const id of ids) {
+    const button = document.createElement('button');
+    button.className = 'model-id'; button.type = 'button'; button.textContent = id;
+    button.title = t('复制模型ID');
+    button.addEventListener('click', () => action(() => api('copy', id), t('已复制模型ID')));
+    list.append(button);
+  }
+}
+$('guide-refresh-models').addEventListener('click', () => action(() => api('models'), t('模型列表已刷新')));
+$('copy-python').addEventListener('click', () => action(async () => {
+  const current = await api('status');
+  if (!current?.apiKey) throw new Error(t('地址或密钥尚未就绪，请先启动服务。'));
+  await api('copy', pythonExample(current.baseURL, current.apiKey));
+}, t('已复制代码（含真实密钥），请勿泄露。')));
+$('rotate-key').addEventListener('click', async () => {
+  if (await confirmAction(t('刷新 API 密钥？'), t('旧密钥将立即失效，所有已接入应用都需要更新密钥或重新接入。'), t('刷新'))) {
+    action(() => api('rotateKey'), t('密钥已刷新，请重新接入应用。'));
+  }
+});
+$('key-rotation').addEventListener('change', async () => {
+  const hours = Number($('key-rotation').value);
+  $('key-rotation').value = String(state.keyRotationHours || 0);
+  if (hours && !await confirmAction(t('开启自动刷新？'), t('每次刷新后旧密钥都会失效，需要重新接入应用。'), t('保存'))) return;
+  action(() => api('setKeyRotation', { hours }), t('自动刷新周期已保存'));
+});

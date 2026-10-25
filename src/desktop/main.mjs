@@ -11,7 +11,7 @@ let locale, languagePath, restarting = false;
 let t = translator('en');
 let sequence = 0;
 const pending = new Map();
-const allowed = new Set(['status', 'start', 'stop', 'login', 'cancelLogin', 'logout', 'models', 'setModelMapping', 'integrate', 'restore', 'setProxy', 'testConnection']);
+const allowed = new Set(['status', 'start', 'stop', 'login', 'cancelLogin', 'logout', 'models', 'setModelMapping', 'rotateKey', 'setKeyRotation', 'integrate', 'restore', 'setProxy', 'testConnection']);
 
 function request(method, args) {
   if (!worker || workerError) return Promise.reject(new Error(workerError || t('服务尚未就绪，请重新打开应用。')));
