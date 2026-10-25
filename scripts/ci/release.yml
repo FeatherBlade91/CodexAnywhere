@@ -47,3 +47,49 @@ jobs:
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           exit 0
+
+  macos:
+    name: macOS / ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run test:desktop
+      - name: Build Mac disk image
+        run: |
+          if [ -n "$CSC_LINK" ]; then
+            npm run dist:mac -- --${{ matrix.arch }}
+          else
+            npm run dist:mac:preview -- --${{ matrix.arch }}
+          fi
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - run: node tests/packaged.mjs
+      - name: Checksum disk image
+        run: |
+          cd dist
+          for file in Codex-Anywhere-*-mac-*.dmg; do shasum -a 256 "$file" > "$file.sha256"; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Codex-Anywhere-mac-${{ matrix.arch }}
+          path: |
+            dist/Codex-Anywhere-*-mac-*.dmg
+            dist/*.sha256

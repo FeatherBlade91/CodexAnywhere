@@ -1,3 +1,11 @@
+## macOS preview (unreleased)
+
+- Shared Windows/macOS desktop implementation with platform-specific paths, system proxy discovery and CC Switch process checks.
+- macOS Keychain credential encryption through a private main/utility-process channel; Windows DPAPI credentials remain compatible.
+- Native menu-bar icon, application menu, Dock reopening and DMG build targets for arm64/x64.
+- Native Keychain round-trip/restart checks and cross-platform packaged-app validation.
+- Mac CI jobs upload build artifacts; public Mac release publication remains manual until signing and notarization are configured.
+
 # Codex-Anywhere 1.0.4
 
 本次更新重点优化 AI 调用的本地前置开销：

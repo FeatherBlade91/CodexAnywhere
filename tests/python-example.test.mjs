@@ -6,7 +6,7 @@ import { pythonExample } from '../src/desktop/renderer/python-example.js';
 
 function python(code, env) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.env.PYTHON || 'python', ['-c', code], { env });
+    const child = spawn(process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3'), ['-c', code], { env });
     let stdout = '', stderr = '';
     child.stdout.on('data', data => { stdout += data; });
     child.stderr.on('data', data => { stderr += data; });

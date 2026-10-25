@@ -49,7 +49,7 @@ Closing the window hides the app to the system tray and keeps the local service 
 | Connect Claude Code | Apply direct configuration, or add the provider to CC Switch. |
 | Change models | Refresh the account catalog and choose from the available models. |
 | Manage the service | Start or stop it and check its status. |
-| Adjust your setup | Set a proxy or launch the app when you sign in to Windows. |
+| Adjust your setup | Set a proxy or launch the app when you sign in to your computer. |
 | Undo client configuration | Restore the backed-up settings through the integration controls. |
 
 Client configuration changes are explicit. Backups protect existing settings; restoration preserves unrelated changes where possible. Restart Claude Code after changing its connection. For CC Switch, select the configured provider in CC Switch.
@@ -88,7 +88,7 @@ In **Settings**, save the proxy before clicking **Test connection**. This checks
 - **Account access:** your subscription determines models, quota, and upstream limits. The app cannot grant additional access. Model names and availability may change.
 - **Reasoning effort:** explicit supported levels pass through to the upstream model. Unsupported levels return an error. Equal level names do not imply equal compute across models.
 - **Context windows:** a client's `[1M]` setting does not increase the server's context limit. Token counts and client cost displays are estimates.
-- **Platform:** the desktop release targets Windows x64. Other architectures and operating systems are not published desktop targets in this release.
+- **Platform:** published releases target Windows x64. This branch adds macOS preview builds.
 - **Privacy:** authorization stays local; never include credentials, local API keys, or personal prompts in issues. Client settings and credentials are not part of the release package.
 - **Validation:** [VALIDATION.md](VALIDATION.md) and [reports/](reports/) contain historical protocol results. They are not proof that every desktop flow or every current account model has been tested live.
 
@@ -97,7 +97,7 @@ In **Settings**, save the proxy before clicking **Test connection**. This checks
 
 ## Development
 
-Use Windows, Node.js 24, and PowerShell:
+Use Windows or macOS with Node.js 24:
 
 Source lives in `src/core/` (API and integrations) and `src/desktop/` (Electron). Build helpers are in `scripts/`, tests in `tests/`, and guides and historical reports in `docs/`.
 
@@ -122,3 +122,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development and test isolation. Prese
 The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](OPENAI-EXAMPLES.md).
 
 Use the actual port displayed by the desktop service for DeepSeek Harness. Profile-based desktop and headless settings are separate, and their credential formats may differ. The guide covers setup and the live tool-call check, `node scripts/live/harness.mjs`.
+
+## macOS preview
+
+On a Mac, run `npm ci`, `npm test`, and `npm run test:desktop`, then `npm run dist:mac:preview -- --arm64` for an Apple Silicon DMG (use `--x64` for Intel), followed by `node tests/packaged.mjs`. Drag the application from the DMG into Applications.
+
+Data lives in `~/Library/Application Support/CodexAnywhere`; credentials are protected by Keychain. Closing the window keeps the service running in the menu bar. Click the Dock icon to reopen, or Cmd+Q to quit. This branch has not published an official Mac release. See [macOS development notes](MACOS.md) for signing, notarization, and validation scope.

@@ -1,8 +1,12 @@
-﻿import { createDesktopService } from './service.mjs';
-const service = createDesktopService();
+﻿import { configureCredentialEncryption } from '../platform/credentials.mjs';
+import { createCredentialClient, isCredentialMessage } from './credential-channel.mjs';
 const port = process.parentPort;
 if (!port) throw new Error('Desktop worker requires an Electron utility process.');
+if (process.platform === 'darwin') configureCredentialEncryption(createCredentialClient(port));
+const { createDesktopService } = await import('./service.mjs');
+const service = createDesktopService();
 port.on('message', async ({ data }) => {
+  if (isCredentialMessage(data)) return;
   const { id, method, args } = data || {};
   try { port.postMessage({ id, result: await service.invoke(method, args) }); }
   catch (error) { port.postMessage({ id, error: error.message || 'Desktop operation failed.' }); }

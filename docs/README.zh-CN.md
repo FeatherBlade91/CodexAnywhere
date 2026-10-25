@@ -47,7 +47,7 @@ Claude Code 和 CC Switch 是可选客户端，需要单独安装。使用 OpenA
 | 连接 Claude Code | 应用直连配置，或添加 CC Switch 供应商。 |
 | 选择模型 | 刷新账号模型列表，从可用模型中选择。 |
 | 管理服务 | 启动、停止、查看状态。 |
-| 调整运行方式 | 设置代理或 Windows 登录时启动。 |
+| 调整运行方式 | 设置代理或登录电脑时启动。 |
 | 撤销客户端配置 | 通过接入设置恢复备份。 |
 
 修改客户端配置需要主动操作，并会备份原设置；恢复时尽量保留无关修改。默认模型映射为 Haiku → `gpt-6-luna`、Sonnet → `gpt-6-sol`、Opus → `gpt-6.1-sol`、Fable → `gpt-6-astra`，可在设置中修改。更改连接或映射后重启 Claude Code。使用 CC Switch 时，在 CC Switch 中选择已配置的供应商。
@@ -84,7 +84,7 @@ Claude Code 出现 `ECONNREFUSED` 时，先看报错中的地址。CC Switch 可
 - **账号权限：** 模型、额度和服务端限制取决于你的订阅；软件不会增加权限。可用模型可能变化。
 - **推理强度：** 显式指定的受支持等级原样传给上游；不支持的等级返回错误。同名等级不代表各模型使用相同算力。
 - **上下文：** 客户端的 `[1M]` 设置不会增加服务端限制。Token 统计和客户端费用显示属于估算。
-- **平台：** 当前桌面 Release 面向 Windows x64，不发布其他架构或操作系统的桌面版本。
+- **平台：** 已发布版本面向 Windows x64；本分支新增 macOS 测试版构建，见下文。
 - **隐私：** 授权保存在本机。Issue 中不要上传凭据、API Key 或私人提示词；安装包不包含个人配置。
 - **验证：** [VALIDATION.md](VALIDATION.md) 和 [reports/](reports/) 保留历史协议测试记录，不代表所有桌面操作或当前账号模型都已完成在线验证。
 
@@ -93,7 +93,7 @@ Claude Code 出现 `ECONNREFUSED` 时，先看报错中的地址。CC Switch 可
 
 ## 开发
 
-环境：Windows、Node.js 24、PowerShell。
+环境：Windows 或 macOS、Node.js 24。
 
 `src/core/` 存放接口与接入逻辑，`src/desktop/` 存放 Electron 桌面代码；构建辅助脚本位于 `scripts/`，测试位于 `tests/`，指南和历史报告位于 `docs/`。
 
@@ -112,3 +112,19 @@ npm run dist             # 构建 Windows 桌面安装包
 
 开发约定和测试隔离见 [CONTRIBUTING.md](CONTRIBUTING.md)。请保留[第三方声明](THIRD-PARTY-NOTICES.md)、[项目许可](../LICENSE)及 [OpenAI Devkit 许可](../vendor/siwc/LICENSE)。
 
+
+## macOS 测试版
+
+本分支支持 macOS 桌面构建，与 Windows 共用界面和业务逻辑。在 Mac 上使用 Node.js 24：
+
+```sh
+npm ci
+npm test
+npm run test:desktop
+npm run dist:mac:preview -- --arm64  # Apple Silicon；Intel 使用 --x64
+node tests/packaged.mjs
+```
+
+打开生成的 DMG，将应用拖入 Applications 后启动。数据保存在 `~/Library/Application Support/CodexAnywhere`；登录凭据由系统钥匙串保护。关闭窗口后服务继续在菜单栏运行，点击 Dock 图标可重新打开，Cmd+Q 完全退出。
+
+此版本尚未作为正式 Mac Release 发布。分发签名、公证及测试范围见 [macOS 开发说明](MACOS.md)。

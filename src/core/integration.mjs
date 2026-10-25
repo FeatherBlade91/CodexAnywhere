@@ -2,7 +2,7 @@ import { modelMapping } from './model-mapping.mjs';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { join, dirname, resolve } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { system } from '../platform/system.mjs';
 import { homedir } from 'node:os';
 import { DatabaseSync, backup } from 'node:sqlite';
 import { root, stateDir, config, saveConfig } from './runtime.mjs';
@@ -14,7 +14,7 @@ const readJson = async (path, fallback) => {
 };
 export async function ccDirectory() {
   if (process.env.CHATGPT_BRIDGE_CC_DIR) return process.env.CHATGPT_BRIDGE_CC_DIR;
-  const paths = await readJson(join(process.env.APPDATA,'com.ccswitch.desktop','app_paths.json'), {});
+  const paths = await readJson(system.ccPathsFile, {});
   const custom = paths.app_config_dir_override;
   if (typeof custom === 'string' && custom.trim()) {
     const p = custom.replace(/^~(?=[/\\]|$)/, userHome);
@@ -149,9 +149,8 @@ export async function assertRestoreReady() {
   const state=await readJson(join(deviceDir,'live-state.json'),{});
   if(state.apps?.claude?.pending) throw new Error('CC Switch has a pending Claude operation. Start CC Switch to recover it, then exit CC Switch before restoring.');
   const isolated=process.env.CHATGPT_BRIDGE_CC_DIR && resolve(userHome)!==resolve(homedir());
-  if(existsSync(dbPath) && process.platform==='win32' && !isolated) {
-    const processes=execFileSync('tasklist.exe',['/FI','IMAGENAME eq cc-switch.exe','/FO','CSV','/NH'],{encoding:'utf8',windowsHide:true});
-    if(/"cc-switch\.exe"/i.test(processes)) throw new Error('Exit CC Switch completely (including the tray icon), then retry restore/uninstall. No configuration has been changed.');
+  if(existsSync(dbPath) && !isolated) {
+    if(system.isCCSwitchRunning()) throw new Error('Exit CC Switch completely (including the tray icon), then retry restore/uninstall. No configuration has been changed.');
   }
   return {ready:true};
 }

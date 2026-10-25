@@ -1,4 +1,4 @@
-name: Windows regression
+name: Desktop regression
 
 on:
   push:
@@ -9,13 +9,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: windows-regression-${{ github.workflow }}-${{ github.ref }}
+  group: desktop-regression-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
-    name: Node 24 / Windows
-    runs-on: windows-latest
+    name: Node 24 / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, macos-15-intel]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
       - name: Check out repository
