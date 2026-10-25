@@ -2,6 +2,8 @@
 
 The canonical artwork is `src/desktop/assets/icon.png`. The window, sidebar and favicon use it directly. `src/desktop/assets/icon.ico` is derived from the same artwork at 16, 24, 32, 48, 64, 128 and 256 pixels for the Windows executable, tray, installer and uninstaller.
 
+The installer also places the same ICO at `resources/app-icon.ico`. Desktop and Start menu shortcuts and the Windows Installed apps entry reference this standalone icon, avoiding stale executable-icon cache entries during upgrades. Installation notifies the Windows Shell to refresh icons. `node tests/icon-resources.mjs` checks the standalone file and every embedded executable icon size against the canonical ICO; set `BRIDGE_PACKAGE_DIR` to the unpacked or installed application directory.
+
 Generated with the built-in image generation tool. The tool does not expose a model selector or verified model version; GPT Image 2.5 was requested but cannot be confirmed.
 
 ## Generation prompt

@@ -10,7 +10,11 @@ The final installer successfully upgraded this machine from 1.0.3 to 1.0.4. Hash
 
 Credential acquisition measurements and reproduction steps are in [PERFORMANCE.md](PERFORMANCE.md). They measure local overhead, not upstream generation speed.
 
-Artifact: `Codex-Anywhere-Setup-1.0.4-x64.exe` (124,888,768 bytes). SHA-256: `ae82b26042398ac5685da38fa5a0b553ea025d4c5281e6597ba927fcb0ea8a6e`.
+Initial artifact: `Codex-Anywhere-Setup-1.0.4-x64.exe` (124,888,768 bytes). SHA-256: `ae82b26042398ac5685da38fa5a0b553ea025d4c5281e6597ba927fcb0ea8a6e`.
+
+The same-version icon revision adds a standalone canonical icon for desktop/Start menu shortcuts and the Windows Installed apps entry, with a Shell cache notification. Executable resources already matched the artwork; all icon sizes and the new standalone ICO were verified against the source. All three packaged desktop tests passed again. A 1.0.4-to-1.0.4 installation preserved configuration and encrypted credentials, and installed shortcuts and registry entries were verified to reference `resources/app-icon.ico`.
+
+Current artifact: `Codex-Anywhere-Setup-1.0.4-x64.exe` (124,979,508 bytes). SHA-256: `2f7d82beb4e6c3dd02228d32d45fd6ac8481046a18ecdc4ff0ec508e7136acab`.
 
 ## Desktop consolidation — 2026-10-24
 
