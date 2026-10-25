@@ -7,7 +7,7 @@ let state = {}, busy = false, loginPending = false, page = 'connections', availa
 const api = (method, args) => window.bridge.invoke(method, args);
 function notice(message, error = false) { clearTimeout(noticeTimer); $('notice').textContent = message; $('notice').classList.toggle('error', error); $('notice').hidden = false; if (!error) noticeTimer = setTimeout(() => { $('notice').hidden = true; }, 6000); }
 function errorText(error) { return t((error?.message || String(error)).replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')); }
-function navigate(target) { page = target; document.querySelectorAll('.page').forEach(el => { el.hidden = el.id !== `page-${target}`; }); document.querySelectorAll('.nav-item').forEach(el => { el.classList.toggle('active', el.dataset.page === target); if (el.dataset.page === target) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); }); $('breadcrumb').textContent = `${t('工作空间')} / ${{ connections: t('连接'), models: t('模型'), settings: t('设置'), guide: t('接入指南') }[target]}`; }
+function navigate(target) { page = target; document.querySelectorAll('.page').forEach(el => { el.hidden = el.id !== `page-${target}`; }); document.querySelectorAll('.nav-item').forEach(el => { el.classList.toggle('active', el.dataset.page === target); if (el.dataset.page === target) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); }); $('breadcrumb').textContent = `${t('工作空间')} / ${{ connections: t('连接'), settings: t('设置'), guide: t('接入指南') }[target]}`; }
 document.querySelectorAll('[data-page]').forEach(el => el.addEventListener('click', () => navigate(el.dataset.page)));
 document.querySelector('.brand').addEventListener('click', () => navigate('connections'));
 function isLoggedIn() { const status = state.session?.status; return Boolean(state.session?.sharing) && ['authenticated', 'logged_in', 'ready', 'connected', 'logged-in'].includes(status); }
@@ -25,7 +25,6 @@ function render() {
   $('login').hidden = loggedIn || loggingIn; $('cancel-login').hidden = !loggingIn; $('logout').hidden = !loggedIn;
   $('route-proxy').textContent = state.proxy ? t('通过已保存代理') : t('直连上游');
   $('base-url').value = state.baseURL || ''; $('anthropic-url').value = state.anthropicURL || ''; $('api-key').value = state.apiKey || '';
-  $('current-model').textContent = loggedIn ? state.model || t('尚未选择') : t('登录后选择模型');
   const integration = state.integration; $('integration-state').textContent = typeof integration === 'string' && integration ? ({direct:t('已配置 Claude Code'),'cc-switch':t('已添加到 CC Switch'),none:t('尚未配置')}[integration] || integration) : integration?.mode ? t('已配置 {name}', { name: integration.mode === 'direct' ? 'Claude Code' : 'CC Switch' }) : t('尚未配置');
   if (document.activeElement !== $('proxy') && !$('proxy').dataset.dirty) $('proxy').value = state.proxy || '';
   $('launch-at-login').checked = Boolean(state.launchAtLogin); $('state-dir').textContent = state.stateDir || ''; $('version').textContent = state.version ? t('版本 {version}', { version: state.version }) : t('桌面版');
@@ -34,12 +33,15 @@ function render() {
   renderExample();
 }
 function renderModels() {
-  const signature = JSON.stringify([availableModels, state.model, busy, isLoggedIn()]);
+  const roles = ['haiku', 'sonnet', 'opus', 'fable'];
+  for (const role of roles) {
+    const input = $('mapping-' + role);
+    if (!input.dataset.dirty) input.value = state.modelMapping?.[role] || '';
+  }
+  const signature = JSON.stringify(availableModels);
   if (signature === modelsSignature) return;
   modelsSignature = signature;
-  const list = $('model-list'); list.replaceChildren(); $('model-count').textContent = availableModels.length ? t('{count} 个模型', { count: availableModels.length }) : '';
-  if (!availableModels.length) { const empty = document.createElement('p'); empty.className = 'empty'; empty.textContent = isLoggedIn() ? t('点击「刷新列表」获取账号可用的模型。') : t('登录 ChatGPT 后，刷新列表查看可用模型。'); list.append(empty); return; }
-  availableModels.forEach(model => { const slug = typeof model === 'string' ? model : model.slug || model.id || model.name; if (!slug) return; const button = document.createElement('button'); button.type = 'button'; button.className = `model-option${state.model === slug ? ' selected' : ''}`; button.setAttribute('aria-pressed', String(state.model === slug)); button.disabled = busy; const copy = document.createElement('span'), title = document.createElement('strong'); title.textContent = typeof model === 'object' ? model.displayName || model.display_name || model.name || slug : slug; copy.append(title); if (typeof model === 'object' && model.description) { const description = document.createElement('small'); description.textContent = model.description; copy.append(description); } const check = document.createElement('span'); check.className = 'model-check'; check.textContent = state.model === slug ? t('✓ 当前模型') : t('选择'); button.append(copy, check); button.addEventListener('click', () => action(() => api('selectModel', slug), t('已切换模型'))); list.append(button); });
+  $('mapping-models').replaceChildren(...availableModels.map(model => Object.assign(document.createElement('option'), { value: model.slug })));
 }
 async function refresh() { const next = await api('status'); if (next) { state = next; render(); } }
 async function action(work, success) { if (busy) return; busy = true; document.querySelectorAll('button:not(.nav-item):not([data-page])').forEach(el => { el.disabled = true; }); try { await work(); await refresh(); if (success) notice(success); } catch (error) { notice(errorText(error), true); } finally { busy = false; document.querySelectorAll('button').forEach(el => { el.disabled = false; }); render(); } }
@@ -53,6 +55,14 @@ $('reveal-key').addEventListener('click', () => { const show = $('api-key').type
 document.querySelectorAll('[data-integrate]').forEach(button => button.addEventListener('click', async () => { const mode = button.dataset.integrate, direct = mode === 'direct'; if (await confirmAction(direct ? t('配置 Claude Code') : t('添加到 CC Switch'), direct ? t('将备份现有 Claude Code 配置，并将连接地址、密钥和模型改为本地服务。你可以通过「恢复原配置」撤销。') : t('将备份 CC Switch 现有配置，并添加 Codex-Anywhere 连接。你可以通过「恢复原配置」撤销。'), t('备份并配置'))) action(() => api('integrate', mode), t('配置已更新')); }));
 $('restore').addEventListener('click', async () => { if (await confirmAction(t('恢复原配置？'), t('仅恢复由 Codex-Anywhere 管理的配置项，并保留之后的其他修改。使用 CC Switch 时，请先退出 CC Switch 再恢复。'), t('恢复原配置'))) action(() => api('restore'), t('已恢复原配置')); });
 $('refresh-models').addEventListener('click', () => action(async () => { const result = await api('models'); availableModels = Array.isArray(result) ? result : result?.models || []; }, t('模型列表已刷新')));
+for (const role of ['haiku', 'sonnet', 'opus', 'fable']) $('mapping-' + role).addEventListener('input', event => { event.target.dataset.dirty = 'true'; });
+$('mapping-form').addEventListener('submit', event => {
+  event.preventDefault();
+  action(async () => {
+    await api('setModelMapping', Object.fromEntries(['haiku', 'sonnet', 'opus', 'fable'].map(role => [role, $('mapping-' + role).value.trim()])));
+    for (const role of ['haiku', 'sonnet', 'opus', 'fable']) delete $('mapping-' + role).dataset.dirty;
+  }, t('模型映射已保存'));
+});
 $('proxy').addEventListener('input', () => { $('proxy').dataset.dirty = 'true'; });
 $('proxy-form').addEventListener('submit', event => { event.preventDefault(); action(async () => { await api('setProxy', $('proxy').value.trim()); delete $('proxy').dataset.dirty; }, t('代理设置已保存')); });
 async function runConnectionTest(outputId) {

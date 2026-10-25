@@ -1,3 +1,4 @@
+import { resolveModelId } from './model-mapping.mjs';
 import { client, stateDir, config } from './runtime.mjs';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -31,8 +32,7 @@ export async function models(refresh = false) {
   return pending;
 }
 export async function selectModel(requested) {
-  const normalized=typeof requested==='string'?requested.trim():requested;
-  const slug = !normalized || /^(claude-|sonnet|opus|haiku)/.test(normalized) ? config.model : normalized.replace(/\[1m\]$/i, '').trim();
+  const slug = resolveModelId(requested, config);
   const model = (await models()).find(m => m.slug === slug);
   if (!model) { const e = new Error(`Model ${slug} is not available for this account. Refresh models or sign in again.`); e.status = 400; e.code = 'model_unavailable'; throw e; }
   return model;

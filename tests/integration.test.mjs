@@ -18,6 +18,9 @@ await writeFile(live,JSON.stringify(original));
 const load=async()=>JSON.parse(await readFile(live,'utf8'));
 test('direct mode preserves unrelated settings and restores only owned values',async()=>{
  await configure('direct');await syncModels(catalog);let value=await load();
+ for (const [role,id] of Object.entries({HAIKU:'gpt-6-luna',SONNET:'gpt-6-sol',OPUS:'gpt-6.1-sol',FABLE:'gpt-6-astra'})) assert.equal(value.env[`ANTHROPIC_DEFAULT_${role}_MODEL`],id+'[1M]');
+ assert.deepEqual(value.modelPicker.options.map(o=>o.model),['haiku','sonnet','opus','fable']);
+ assert.equal(value.model,'sonnet');
  assert.equal(value.env.KEEP,'yes');assert.equal(value.effortLevel,'max');assert.deepEqual(value.hooks,original.hooks);
  const oldPort=config.port; config.port=oldPort+1; await updatePort(oldPort); value=await load();
  assert.equal(value.env.ANTHROPIC_BASE_URL,`http://127.0.0.1:${config.port}`);
@@ -36,8 +39,18 @@ test('CC registration is idempotent, nonnegative, preserves other providers and 
  const check=new DatabaseSync(join(base,'cc','cc-switch.db'));const rows=check.prepare('SELECT * FROM providers').all();check.close();
  assert.equal(JSON.parse(rows.find(r=>r.id!=='existing').settings_config).env.ANTHROPIC_BASE_URL,`http://127.0.0.1:${config.port}`);
  assert.equal(rows.length,2);assert.equal(rows.find(r=>r.id==='existing').is_current,1);assert.ok(rows.filter(r=>r.id!=='existing').every(r=>r.sort_index>=0));
- assert.equal(JSON.parse(rows.find(r=>r.id!=='existing').meta).stackModels.length,2);
+ assert.equal(JSON.parse(rows.find(r=>r.id!=='existing').meta).stackModels.length,4);
  const before=await load();const applied=providerSettings(catalog[0].slug);await writeFile(live,JSON.stringify({...before,model:applied.model,env:{...before.env,...applied.env}}));
  await restoreIntegration();assert.deepEqual(await load(),before);
  const end=new DatabaseSync(join(base,'cc','cc-switch.db'));assert.equal(end.prepare('SELECT COUNT(*) AS n FROM providers').get().n,1);end.close();
+});
+
+test('aliases, versioned IDs and explicit GPT models resolve independently of legacy selection', async()=>{
+ const {resolveModelId,DEFAULT_MODEL_MAPPING}=await import('../src/core/model-mapping.mjs');
+ for (const [role,id] of Object.entries(DEFAULT_MODEL_MAPPING)) {
+   for (const name of [role,role+'[1M]','claude-'+role+'-5-20261001','claude-3-5-'+role+'-20241022']) assert.equal(resolveModelId(name,{model:'gpt-old'}),id);
+ }
+ assert.equal(resolveModelId('gpt-6-astra[1M]'), 'gpt-6-astra');
+ assert.equal(resolveModelId('',{model:'gpt-old'}),'gpt-6-sol');
+ assert.equal(resolveModelId('fable',{modelMapping:{fable:'gpt-custom'}}),'gpt-custom');
 });

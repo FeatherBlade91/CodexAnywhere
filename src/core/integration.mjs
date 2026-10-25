@@ -1,3 +1,4 @@
+import { modelMapping } from './model-mapping.mjs';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { join, dirname, resolve } from 'node:path';
@@ -23,11 +24,14 @@ export async function ccDirectory() {
   return join(userHome,'.cc-switch');
 }
 export function providerId() { return config.providerId || 'chatgpt-plan-local'; }
-export function providerSettings(slug) {
+export function providerSettings() {
+  const mapping = modelMapping(config);
+  const slug = mapping.sonnet;
   return { model: slug, env: {
     ANTHROPIC_BASE_URL: `http://127.0.0.1:${config.port}`, ANTHROPIC_AUTH_TOKEN: config.localKey,
     ANTHROPIC_MODEL: slug, ANTHROPIC_REASONING_MODEL: slug,
-    ANTHROPIC_DEFAULT_SONNET_MODEL: slug, ANTHROPIC_DEFAULT_OPUS_MODEL: slug, ANTHROPIC_DEFAULT_HAIKU_MODEL: slug,
+    ANTHROPIC_DEFAULT_SONNET_MODEL: mapping.sonnet, ANTHROPIC_DEFAULT_OPUS_MODEL: mapping.opus, ANTHROPIC_DEFAULT_HAIKU_MODEL: mapping.haiku,
+    ANTHROPIC_DEFAULT_FABLE_MODEL: mapping.fable,
     CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
   }};
 }
@@ -110,14 +114,13 @@ export async function syncModels(catalog) {
       const owned=db.prepare("SELECT id,is_current FROM providers WHERE app_type='claude' AND json_extract(meta,'$.chatgptPlanBridge')=1").all();
       // Retain the selected legacy row ID so CC Switch's route references remain valid.
       config.providerId=owned.find(p=>p.is_current)?.id || owned.find(p=>p.id===config.providerId)?.id || owned[0]?.id || providerId();
-      const selected=catalog.find(m=>m.slug===config.model) || catalog[0];
-      config.model=selected.slug;
-      const ordered=[selected,...catalog.filter(m=>m.slug!==selected.slug)];
+      const mapping=modelMapping(config);
+      const ordered=Object.entries(mapping).map(([role,slug])=>({slug,displayName:`${role} · ${slug}`}));
       const stmt=db.prepare(`INSERT INTO providers (id,app_type,name,settings_config,website_url,category,created_at,sort_index,notes,icon,meta,is_current)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,0) ON CONFLICT(id,app_type) DO UPDATE SET name=excluded.name,settings_config=excluded.settings_config,notes=excluded.notes,meta=excluded.meta,sort_index=excluded.sort_index`);
-      stmt.run(providerId(),'claude','Codex-Anywhere',JSON.stringify(providerSettings(selected.slug)),
+      stmt.run(providerId(),'claude','Codex-Anywhere',JSON.stringify(providerSettings()),
         'https://learn.chatgpt.com/cookbook/articles/sign-in-with-chatgpt','custom',Date.now(),0,
-        `官方订阅授权 · ${catalog.length} 个模型 · 在聚合模式 /model 中切换。由 Codex-Anywhere 刷新模型；effort 原样传递。`,
+        `官方订阅授权 · ${ordered.length} 个模型 · 在聚合模式 /model 中切换。由 Codex-Anywhere 刷新模型；effort 原样传递。`,
         'openai',JSON.stringify({apiFormat:'anthropic',commonConfigEnabled:false,endpointAutoSelect:false,chatgptPlanBridge:true,
           stackModels:ordered.map(m=>({model:m.slug,displayName:m.displayName,oneM:true}))}));
       db.prepare("DELETE FROM providers WHERE app_type='claude' AND json_extract(meta,'$.chatgptPlanBridge')=1 AND id<>?").run(providerId());
@@ -125,18 +128,18 @@ export async function syncModels(catalog) {
       await saveConfig();
     } catch(e) { try {db.exec('ROLLBACK');}catch{} throw e; } finally {db.close();}
   } else {
-    const model=catalog.find(m=>m.slug===config.model) || catalog[0];
-    const applied=providerSettings(model.slug);
-    applied.model=model.slug+'[1M]';
+    const mapping=modelMapping(config);
+    const applied=providerSettings();
+    applied.model='sonnet';
     for(const key of Object.keys(applied.env)) if(key==='ANTHROPIC_MODEL'||key==='ANTHROPIC_REASONING_MODEL'||/^ANTHROPIC_DEFAULT_.*_MODEL$/.test(key)) applied.env[key]+='[1M]';
-    applied.modelPicker={replaceBuiltInOptions:true,options:catalog.map(m=>({model:m.slug+'[1M]',label:m.displayName,description:'ChatGPT subscription · client 1M marker; account limits apply'}))};
+    applied.modelPicker={replaceBuiltInOptions:true,options:Object.entries(mapping).map(([role,slug])=>({model:role,label:role,description:slug}))};
     await mkdir(dirname(live),{recursive:true});
     const restorePath=join(stateDir,'direct-restore.json');
     const restore=await readJson(restorePath,{original:existing});
     restore.applied=applied;
     await writeFile(restorePath,JSON.stringify(restore,null,2));
     await writeFile(live,JSON.stringify({...existing,model:applied.model,modelPicker:applied.modelPicker,env:{...existing.env,...applied.env}},null,2));
-    config.model=model.slug; await saveConfig();
+    await saveConfig();
   }
   return {mode,count:catalog.length,providerCount:1,backup:directory};
 }
@@ -205,7 +208,10 @@ export async function restoreIntegration() {
           const value=current.env[key];
           const isConnection=key==='ANTHROPIC_BASE_URL'||key==='ANTHROPIC_AUTH_TOKEN';
           const isLocalProxy=isConnection && current.env.ANTHROPIC_AUTH_TOKEN==='PROXY_MANAGED';
-          if(directOwned || ownedModel(value) || isLocalProxy || (key==='CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC' && value==='1')) setOriginal(current.env,key,original.env);
+          if(directOwned || ownedModel(value) || isLocalProxy || (key==='CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC' && value==='1')) {
+            if(ownedModel(value) && key.endsWith('_MODEL')) setOriginal(current.env,key+'_NAME',original.env);
+            setOriginal(current.env,key,original.env);
+          }
         }
         for(const [key,value] of Object.entries(current.env)) if(ownedModel(value)) {
           setOriginal(current.env,key,original.env);

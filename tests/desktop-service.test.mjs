@@ -19,12 +19,12 @@ function fixture() {
     createServer:()=>createServer((req,res)=>res.end('ok')), integration:{configure:async()=>{integrates++},syncModels:async()=>{integrates++}}});
   return {service, config, integrates:()=>integrates};
 }
-test('model discovery and selection never apply an integration', async()=>{
+test('model discovery and mapping settings never apply an integration', async()=>{
   const f=fixture();
   assert.equal((await f.service.invoke('models')).models.length,2);
-  await f.service.invoke('selectModel',{model:'second'});
-  assert.equal(f.config.model,'second'); assert.equal(f.integrates(),0);
-  await assert.rejects(f.service.invoke('selectModel',{model:'missing'}));
+  await f.service.invoke('setModelMapping',{haiku:'gpt-test',sonnet:'gpt-test',opus:'gpt-test',fable:'gpt-test'});
+  assert.equal(f.config.modelMapping.haiku,'gpt-test'); assert.equal(f.integrates(),0);
+  await assert.rejects(f.service.invoke('setModelMapping',{haiku:'invalid'}));
   await f.service.invoke('integrate',{mode:'direct'}); assert.equal(f.integrates(),2);
 });
 test('status and cancellation remain usable while sign-in is pending', async()=>{
@@ -83,11 +83,12 @@ test('failed integration restores previous configured mode', async()=>{
   await assert.rejects(service.invoke('integrate',{mode:'cc-switch'}),/Database busy/);
   assert.equal(config.integration,'direct');
 });
-test('explicit model selection updates an existing integration', async()=>{
+test('explicit mapping save updates an existing integration', async()=>{
   const config={port:0,localKey:'test',model:'first',integration:'direct'}; let applied;
   const service=createDesktopService({config,client:{getSession:async()=>({status:'connected',sharing:true})},saveConfig:async()=>{},models:async()=>[{slug:'first'},{slug:'second'}],
-    integration:{syncModels:async()=>{applied=config.model}}});
-  await service.invoke('selectModel',{model:'second'}); assert.equal(applied,'second');
+    integration:{syncModels:async()=>{applied=config.modelMapping}}});
+  const mapping={haiku:'gpt-6-luna',sonnet:'gpt-6-sol',opus:'gpt-6.1-sol',fable:'gpt-6-astra'};
+  await service.invoke('setModelMapping',mapping); assert.deepEqual(applied,mapping);
 });
 test('sign-in queued behind a mutation can be cancelled before opening browser', async()=>{
   let release, logins=0;
@@ -125,4 +126,12 @@ test('failed port synchronization closes listener and restores saved port', asyn
   assert.equal(config.port,previous); assert.equal((await service.invoke('status')).running,false);
   const probe=createServer(); await new Promise((resolve,reject)=>probe.once('error',reject).listen(allocated,'127.0.0.1',resolve));
   await new Promise(resolve=>probe.close(resolve));
+});
+
+test('failed mapping sync preserves the previous mapping', async()=>{
+  const old={haiku:'gpt-old',sonnet:'gpt-old',opus:'gpt-old',fable:'gpt-old'};
+  const config={modelMapping:old,integration:'direct'};
+  const service=createDesktopService({config,client:{getSession:async()=>({})},saveConfig:async()=>{},models:async()=>[],integration:{syncModels:async()=>{throw Error('sync failed')}}});
+  await assert.rejects(service.invoke('setModelMapping',{...old,opus:'gpt-new'}),/sync failed/);
+  assert.deepEqual(config.modelMapping,old);
 });

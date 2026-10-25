@@ -2,7 +2,7 @@
 
 在主页登录并启动服务，复制 API 地址（默认 `http://127.0.0.1:17863/v1`）和本地 API 密钥。密钥是本软件生成的本地访问凭据。
 
-`model` 必须填写 `/v1/models` 返回的准确 ID，例如 `gpt-6.1-sol`。OpenAI 路径原样转发 ID，不解析显示名称、Claude 别名或 `[1M]` 后缀，也不使用主页的 Claude Code 默认模型替换它。
+`model` 必须填写 `/v1/models` 返回的准确 ID，例如 `gpt-6.1-sol`。OpenAI 路径原样转发 ID，不解析显示名称、Claude 别名或 `[1M]` 后缀，也不使用Claude Code 的模型映射替换它。
 
 ```python
 from openai import OpenAI, DefaultHttpxClient

@@ -1,5 +1,10 @@
 // Source text is the Simplified Chinese key. Keep both translations together.
 export const translations = Object.fromEntries([
+  ["Claude Code 模型映射", "Claude Code 模型對應", "Claude Code model mapping"],
+  ["在 Claude Code 中切换档位；在这里设置各档位使用的模型。保存后重启 Claude Code；CC Switch 用户需重新应用供应商。", "在 Claude Code 中切換檔位；在此設定各檔位使用的模型。儲存後重新啟動 Claude Code；CC Switch 使用者需重新套用供應商。", "Switch tiers in Claude Code and configure their models here. Restart Claude Code after saving; CC Switch users should reapply the provider."],
+  ["保存映射", "儲存對應", "Save mapping"],
+  ["模型映射已保存", "模型對應已儲存", "Model mapping saved"],
+
   ['登录与 API 网络可达；未验证账号权限或模型生成能力。', '登入與 API 網路可達；未驗證帳號權限或模型生成能力。', 'Sign-in and API endpoints are reachable. Account access and model generation were not verified.'],
   ['通过已保存代理', '透過已儲存代理', 'Via saved proxy'],
   ['连接需要处理', '連線需要處理', 'Connection needs attention'],
@@ -50,7 +55,7 @@ export const translations = Object.fromEntries([
   ['模型 ID 可通过', '模型 ID 可透過', 'Find model IDs with '],
   ['查询。比如', '查詢。例如', '. For example, '],
   ['就请求同名实际模型；应用显示名称可自定义，但请求的', '就會請求同名實際模型；應用程式顯示名稱可自訂，但請求的', 'requests the actual model with that ID. You can customize its display name, but the requested '],
-  ['不会替换成主页的 Claude Code 模型，也不会解析别名或', '不會替換成首頁的 Claude Code 模型，也不會解析別名或', 'is not replaced by the Claude Code model on the home page. Aliases and the '],
+  ['不受 Claude Code 模型映射影响，也不会解析别名或', '不會替換成首頁的 Claude Code 模型，也不會解析別名或', 'is not replaced by the Claude Code model on the home page. Aliases and the '],
   ['后缀。', '後綴。', ' suffix are not resolved.'],
   ['effort 如何对应思考强度', 'effort 如何對應思考強度', 'How effort maps to reasoning intensity'],
   ['Chat Completions 使用', 'Chat Completions 使用', 'Chat Completions uses '],

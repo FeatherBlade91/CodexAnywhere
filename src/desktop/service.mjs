@@ -1,3 +1,4 @@
+import { modelMapping, validateModelMapping } from '../core/model-mapping.mjs';
 import { t } from './localize.mjs';
 ﻿import { client, config, saveConfig, stateDir, applyProxy } from '../core/runtime.mjs';
 import { models, clearModels } from '../core/catalog.mjs';
@@ -15,7 +16,7 @@ export function createDesktopService(dependencies = {}) {
     const session = signingIn ? { status: 'connecting', sharing: false } : await auth.getSession();
     return { running: !!server?.listening, session: { status: session.status, sharing: !!session.sharing }, port: settings.port,
       baseURL: `http://127.0.0.1:${settings.port}/v1`, anthropicURL: `http://127.0.0.1:${settings.port}`,
-      apiKey: settings.localKey, model: settings.model, proxy: settings.proxy || '', integration: settings.integration || null,
+      apiKey: settings.localKey, model: settings.model, modelMapping: modelMapping(settings), proxy: settings.proxy || '', integration: settings.integration || null,
       models: catalog, stateDir: dependencies.stateDir || stateDir };
   }
   async function stop() {
@@ -72,19 +73,21 @@ export function createDesktopService(dependencies = {}) {
       finally { catalog = []; (dependencies.clearModels || clearModels)(); }
     }
     else if (method === 'models') { catalog = await discover(true); }
-    else if (method === 'selectModel') {
-      const slug = typeof args === 'string' ? args : args.model || args.slug;
-      const available = await discover();
-      if (!available.some(model => model.slug === slug)) throw new Error(t('此模型暂不可用，请刷新模型后重新选择。'));
-      const previous = settings.model;
-      settings.model = slug;
+    else if (method === 'setModelMapping') {
+      const mapping = validateModelMapping(args);
+      const available = settings.integration ? await discover() : catalog;
+      const previous = settings.modelMapping;
+      settings.modelMapping = mapping;
       try {
         if (settings.integration) {
           const integration = dependencies.integration || await import('../core/integration.mjs');
           await integration.syncModels(available);
         }
         await persist(); catalog = available;
-      } catch (error) { settings.model = previous; await persist(); throw error; }
+      } catch (error) {
+        if (previous === undefined) delete settings.modelMapping; else settings.modelMapping = previous;
+        await persist(); throw error;
+      }
     } else if (method === 'integrate') {
       const mode = typeof args === 'string' ? args : args.mode;
       if (!['direct', 'cc-switch'].includes(mode)) throw new Error(t('请选择 Claude Code 直连或 CC Switch。'));

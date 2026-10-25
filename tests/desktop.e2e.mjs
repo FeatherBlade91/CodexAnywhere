@@ -54,6 +54,14 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
     await page.locator('#confirm-dialog').waitFor({ state: 'visible' });
     await page.locator('#confirm-dialog button[value="cancel"]').click();
     await page.locator('.nav-item[data-page="settings"]').click();
+    assert.equal(await page.locator('[data-page="models"]').count(), 0);
+    for (const [role, id] of Object.entries({haiku:'gpt-6-luna',sonnet:'gpt-6-sol',opus:'gpt-6.1-sol',fable:'gpt-6-astra'})) assert.equal(await page.locator('#mapping-'+role).inputValue(),id);
+    await page.locator('#mapping-haiku').fill('gpt-6-sol');
+    await page.locator('#mapping-form button[type="submit"]').click();
+    await page.waitForFunction(() => !document.querySelector('#mapping-haiku').dataset.dirty);
+    assert.equal((await page.evaluate(() => window.bridge.invoke('status'))).modelMapping.haiku, 'gpt-6-sol');
+    await mkdir('test-results', { recursive: true });
+    await page.screenshot({ path: 'test-results/desktop-mapping.png', fullPage: true });
     await page.locator('#proxy').fill('socks5://127.0.0.1:9');
     await page.locator('#proxy-form button[type="submit"]').click();
     await page.locator('#notice.error').waitFor({ state: 'visible' });
