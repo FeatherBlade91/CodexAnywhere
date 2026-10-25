@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-25T06:00:19.418Z",
+  "client": "Installed dsh headless",
+  "baseURL": "http://127.0.0.1:65039/v1",
+  "modelDiscovery": {
+    "status": 200,
+    "modelCount": 7
+  },
+  "cases": [
+    {
+      "model": "gpt-6.1-sol",
+      "test": "streaming tool read and follow-up response",
+      "exitCode": 0,
+      "passed": true,
+      "elapsedMs": 33138
+    },
+    {
+      "model": "gpt-6-astra",
+      "test": "streaming tool read and follow-up response",
+      "exitCode": 0,
+      "passed": true,
+      "elapsedMs": 27878
+    }
+  ],
+  "clientVersion": "0.1.0-rc.6",
+  "configuration": {
+    "desktopProfileUpdated": true,
+    "headlessProfileConfigured": true,
+    "credentialsReadFromPersistentCliStore": true,
+    "temporaryApiKeyInjection": false,
+    "backupsCreated": true
+  },
+  "scope": "Real installed headless CLI using saved provider and credentials, isolated workspace, streaming file tool call and follow-up response for two models. Desktop GUI chat, every reasoning level, web search, and long context are not covered."
+}

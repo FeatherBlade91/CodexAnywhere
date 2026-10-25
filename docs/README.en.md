@@ -120,3 +120,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development and test isolation. Prese
 ### OpenAI examples
 
 The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](OPENAI-EXAMPLES.md).
+
+Use the actual port displayed by the desktop service for DeepSeek Harness. Profile-based desktop and headless settings are separate, and their credential formats may differ. The guide covers setup and the live tool-call check, `node scripts/live/harness.mjs`.

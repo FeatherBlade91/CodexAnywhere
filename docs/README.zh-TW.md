@@ -120,3 +120,5 @@ npm run dist             # 建置 Windows 桌面安裝程式
 ### OpenAI 設定範例
 
 首頁提供模型 ID、最簡單的 Python 聊天程式及思考強度對應說明，詳見 [OpenAI / DeepSeek Harness 設定範例](OPENAI-EXAMPLES.md)。
+
+DeepSeek Harness 請使用桌面服務顯示的實際連接埠；profile 版的桌面與 headless 設定分別儲存，CLI 與桌面憑證格式也可能不同。上述指南包含設定方式與 `node scripts/live/harness.mjs` 實機工具呼叫檢查。

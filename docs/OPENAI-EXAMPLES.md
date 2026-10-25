@@ -41,31 +41,40 @@ Claude Code 的 Anthropic 路径不同：`output_config.effort` 在本地按模�
 
 在模型设置中新建提供商 `codex-anywhere`，使用 `openai-completions` 协议，上述 Base URL 和 API Key，添加准确模型 ID。思考格式选 `openai` 并启用 reasoning effort。
 
-对应新版本 Harness 的 `~/.dsh/settings.yaml` 配置如下（合并此项，保留现有提供商）：
+先从运行中的桌面服务复制实际 Base URL。`17863` 只是默认端口，保存的端口或端口冲突可能使服务使用其他端口。
+
+使用 profile 的 Harness 在 `~/.dsh/profiles/desktop/cordis.patch.yml` 中配置桌面端，在 `profiles/headless/cordis.patch.yml` 中配置 CLI。配置是数组，下面是 `llm-pi-ai` 项的示例；编辑已有项时保留其他提供商，勿重复添加同一 id：
 
 ```yaml
-llm-pi-ai:
-  providers:
-    codex-anywhere:
-      displayName: Codex-Anywhere
-      api: openai-completions
-      baseURL: http://127.0.0.1:17863/v1
-      apiKeyEnv: CODEX_ANYWHERE_API_KEY
-      compat:
-        thinkingFormat: openai
-        supportsReasoningEffort: true
-      models:
-        - id: gpt-6.1-sol
-          name: GPT-6.1-Sol (Codex-Anywhere)
-          reasoningEfforts:
-            low: low
-            medium: medium
-            high: high
-            xhigh: xhigh
-            max: max
+- id: llm-pi-ai
+  config:
+    providers:
+      codex-anywhere:
+        displayName: Codex-Anywhere
+        api: openai-completions
+        baseURL: http://127.0.0.1:17863/v1 # 替换为桌面服务的实际地址
+        apiKeyEnv: CODEX_ANYWHERE_API_KEY
+        compat:
+          thinkingFormat: openai
+          supportsReasoningEffort: true
+        models:
+          - id: gpt-6.1-sol
+            name: GPT-6.1-Sol (Codex-Anywhere)
+            reasoningEfforts:
+              low: low
+              medium: medium
+              high: high
+              xhigh: xhigh
+              max: max
 ```
 
 通过 Harness 的凭据设置保存 `CODEX_ANYWHERE_API_KEY`。各版本凭据文件格式不同，不要直接覆盖现有文件。选择新提供商与模型即可聊天，原有默认模型可以保留。
+
+本机 CLI `0.1.0-rc.6` 要求凭据文件是引用名称到字符串的平面映射，而桌面凭据使用 `version/refs/records`。两者共存时，在 CLI profile 的 `credentials` 项中将 `config.path` 指向单独的 CLI 凭据文件，并在该文件中保存同一密钥；保留桌面凭据原结构。CLI 的 `agent-default-model` 项通过 `config.provider` 和 `config.model` 选择模型。旧版本使用 `settings.yaml`；若该文件已迁移为 `settings.yaml.imported`，应修改对应 profile。
+
+本项目提供 `node scripts/live/harness.mjs` 实机检查：使用已保存的桌面与 headless 配置及凭据，在临时目录生成随机文件，让 Harness 用工具读取并返回内容，覆盖流式工具调用与后续模型请求。结果保存为 `test-results/harness-live.json`。需要运行中的桌面服务、有效登录和已安装的 Harness，会消耗订阅额度。脚本不更改默认模型或凭据。
+
+2026-10-25 复测：修正本机 profile 中过期的端口和 CLI 凭据路径后，`gpt-6.1-sol` 与 `gpt-6-astra` 均通过上述工具调用测试，退出码均为 0；使用持久化凭据，没有临时注入 API Key。详见 [实机报告](reports/harness-tools-live.json)。这不代表所有思考档位、长上下文或桌面 GUI 聊天均已验证。
 
 `reasoningEfforts` 的键是 Harness 显示档位，值是线上的参数值。上面的同名映射会发送 `reasoning_effort="low"` 等值；若配置为 `high: xhigh`，Harness 的 high 档实际会发送 xhigh，代理仍原样转发。只配置模型实际支持的档位。
 

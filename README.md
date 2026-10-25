@@ -120,3 +120,5 @@ npm run dist             # 构建 Windows 桌面安装包
 ### OpenAI examples
 
 The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](docs/OPENAI-EXAMPLES.md).
+
+DeepSeek Harness 请使用桌面服务显示的实际端口；profile 版的桌面与 headless 配置分别保存，CLI 与桌面凭据格式也可能不同。上述指南包含配置方法和 `node scripts/live/harness.mjs` 实机工具调用检查。
