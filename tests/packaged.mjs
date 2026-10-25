@@ -15,7 +15,7 @@ for (const entry of listPackage(archive)) {
   }
 }
 const manifest = JSON.parse(extractFile(archive, 'package.json'));
-for (const name of ['vendor/siwc/storage.js', 'src/core/model-cache.mjs', 'src/core/openai-server.mjs']) {
+for (const name of ['vendor/siwc/storage.js', 'src/core/model-cache.mjs', 'src/core/openai-server.mjs', 'src/core/uninstall.mjs', 'src/desktop/renderer/python-example.js', 'src/desktop/assets/icon.png', 'src/desktop/assets/icon.ico']) {
   assert(extractFile(archive, normalize(name)).equals(await readFile(name)), `Packaged performance implementation differs: ${name}`);
 }
 assert.equal(manifest.main, 'src/desktop/main.mjs');

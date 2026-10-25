@@ -84,7 +84,26 @@ function createWindow() {
   window.loadURL(page);
 }
 
-if (!app.requestSingleInstanceLock()) app.quit();
+if (process.argv.includes('--uninstall-cleanup')) {
+  // NSIS has already stopped the application. Do not start a window, tray,
+  // background service or login flow while restoring owned client settings.
+  if (!app.requestSingleInstanceLock()) app.exit(2);
+  else app.whenReady().then(async () => {
+    const { prepareUninstall } = await import('../core/uninstall.mjs');
+    const argument = process.argv.indexOf('--uninstall-state-dir');
+    const stateDir = argument >= 0 ? process.argv[argument + 1] : process.env.CHATGPT_BRIDGE_STATE_DIR || join(process.env.LOCALAPPDATA || app.getPath('userData'), 'CodexAnywhere');
+    if (!stateDir) throw new Error('Missing uninstall data directory.');
+    process.env.CHATGPT_BRIDGE_STATE_DIR = stateDir;
+    await prepareUninstall({ stateDir,
+      restore: async () => { const { restoreIntegration } = await import('../core/integration.mjs'); await restoreIntegration(); },
+      disableStartup: () => app.setLoginItemSettings({ openAtLogin: false }),
+    });
+    app.exit(0);
+  }).catch(error => {
+    if (!process.argv.includes('--silent')) dialog.showErrorBox('Uninstall could not finish', error.message);
+    app.exit(2);
+  });
+} else if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', showWindow);
   app.on('activate', showWindow);

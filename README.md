@@ -14,6 +14,10 @@
 
 </div>
 
+**v1.0.4：** 优化 AI 请求前的凭据读取和模型列表刷新，详见[性能测量](docs/PERFORMANCE.md)。接入指南支持完整模型 ID 列表刷新和 Python 代码复制。API 密钥可手动刷新，或按 1 小时／1 天／7 天自动刷新，默认关闭；刷新后需更新客户端密钥或重新接入。
+
+正常卸载会恢复受管理的客户端接入配置并删除本软件的本地数据；升级安装保留账号与配置。
+
 ![Codex-Anywhere 桌面界面，包含 ChatGPT 登录、OpenAI 应用和 Claude Code 连接设置](docs/assets/desktop.png)
 
 *真实 Electron 未登录界面，使用隔离测试数据，密钥已遮蔽。截图为临时测试端口，默认端口为 `17863`。*
@@ -114,7 +118,7 @@ npm run test:desktop     # 桌面界面测试
 npm run dist             # 构建 Windows 桌面安装包
 ```
 
-安装包名称为 `Codex-Anywhere-Setup-1.0.1-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
+安装包名称为 `Codex-Anywhere-Setup-1.0.4-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
 
 开发约定和测试隔离见 [CONTRIBUTING.md](docs/CONTRIBUTING.md)。请保留[第三方声明](docs/THIRD-PARTY-NOTICES.md)、[项目许可](LICENSE)及 [OpenAI Devkit 许可](vendor/siwc/LICENSE)。
 

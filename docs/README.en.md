@@ -14,6 +14,10 @@
 
 </div>
 
+**v1.0.4:** Faster credential acquisition and background model discovery reduce local inference overhead; see [measurements](PERFORMANCE.md). The guide can refresh the full model ID list and copy Python examples. API keys support manual rotation or automatic rotation every hour, day, or week, disabled by default. After rotation, update client keys or reconnect your apps.
+
+Normal uninstall restores managed client settings and removes this app’s local data. Upgrades preserve accounts and configuration.
+
 ![Codex-Anywhere desktop showing ChatGPT sign-in and OpenAI and Claude Code connection controls](assets/desktop.png)
 
 *Actual Electron window before sign-in, captured with isolated test data and a masked key. The temporary test port shown differs from the default `17863`.*
@@ -112,7 +116,7 @@ npm run test:desktop     # Desktop UI tests
 npm run dist             # Build the Windows desktop installer
 ```
 
-The installer is named `Codex-Anywhere-Setup-1.0.1-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
+The installer is named `Codex-Anywhere-Setup-1.0.4-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and test isolation. Preserve [third-party notices](THIRD-PARTY-NOTICES.md), the [project license](../LICENSE), and the [OpenAI Devkit license](../vendor/siwc/LICENSE).
 
