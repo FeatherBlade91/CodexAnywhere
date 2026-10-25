@@ -3,11 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { Agent, ProxyAgent, setGlobalDispatcher } from 'undici';
-import { system } from '../platform/system.mjs';
+import { createSystem } from '../platform/system.mjs';
 import { getCredentialEncryption } from '../platform/credentials.mjs';
 import { createChatGPT } from '../../vendor/siwc/index.js';
 
 export const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
+// Resolve at core initialization: the uninstall entry point may set isolation
+// after the desktop shell has imported the platform module.
+const system = createSystem();
 export const stateDir = system.stateDir;
 await mkdir(stateDir, { recursive: true });
 export const configPath = join(stateDir, 'bridge.json');

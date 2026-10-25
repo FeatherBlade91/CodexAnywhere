@@ -2,6 +2,16 @@
 
 [Back to README](../README.md)
 
+## v1.0.4 — 2026-10-25
+
+All 78 backend tests passed, including credential caching/rotation/cancellation, model refresh/persistence, local API key rotation, and uninstall preparation. All three packaged Electron tests passed. Packaged source equality (including new icons, the credential store and uninstall helper), ASAR integrity, and Windows DPAPI checks passed.
+
+The final installer successfully upgraded this machine from 1.0.3 to 1.0.4. Hashes confirmed that existing `bridge.json` and encrypted credentials were preserved, and the installed ASAR matched the tested package. The application was reopened. Uninstall preparation was tested with isolated fixtures, including failure preservation; a destructive full uninstall of the personal installation was not performed. The NSIS hook and installer compiled successfully. No live model-generation requests were made for this release.
+
+Credential acquisition measurements and reproduction steps are in [PERFORMANCE.md](PERFORMANCE.md). They measure local overhead, not upstream generation speed.
+
+Artifact: `Codex-Anywhere-Setup-1.0.4-x64.exe` (124,888,768 bytes). SHA-256: `ae82b26042398ac5685da38fa5a0b553ea025d4c5281e6597ba927fcb0ea8a6e`.
+
 ## Desktop consolidation — 2026-10-24
 
 The unified Electron desktop replaces the separate Plan Bridge and API Gateway release formats. During consolidation, all 43 backend regression tests passed. These include shared protocol/service behavior and desktop service controls; this count does not imply 43 live subscription requests.

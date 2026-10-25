@@ -1,4 +1,4 @@
-## macOS preview (unreleased)
+## macOS beta — v1.0.4-mac-beta.1
 
 - Shared Windows/macOS desktop implementation with platform-specific paths, system proxy discovery and CC Switch process checks.
 - macOS Keychain credential encryption through a private main/utility-process channel; Windows DPAPI credentials remain compatible.
@@ -15,6 +15,9 @@
 - 模型列表过期时使用已有列表并后台刷新，减少 Claude Code 工具调用轮次中的等待；主动刷新仍等待最新结果。
 - 不改变模型、推理强度、上下文、工具定义或回答内容处理。补充凭据并发、轮换、取消、损坏文件、模型缓存及提前流式输出测试。
 - Windows 隔离测试中，凭据冷读取平均 1,288 ms，缓存有效时平均 2.82 ms；这是本地组件测量，并非模型生成或端到端速度承诺。复现方法见 `docs/PERFORMANCE.md`。
+- 合并新版接入指南：完整模型 ID 列表刷新、思考强度表格、Python 高亮与复制；示例默认 `gpt-6-luna` / `low`，复制时填入当前本机密钥。
+- 本地 API 密钥支持手动刷新和每小时／每天／每周自动刷新，默认关闭；旧密钥失效后需要更新客户端或重新接入。
+- 更新应用图标并精简连接页。卸载时恢复本软件管理的客户端配置，关闭开机启动，并清理本地数据、程序、快捷方式和卸载注册信息；恢复失败时保留安装与备份。升级安装保留账号与配置。
 
 一个独立的 Electron 桌面应用，统一原来的 Plan Bridge 和 API Gateway。
 
@@ -33,7 +36,7 @@
 
 下载 `Codex-Anywhere-Setup-1.0.4-x64.exe`，适用于 Windows 10/11 x64。账户权限和额度由上游决定。
 
-安装包尚未代码签名，可使用附带的 SHA-256 校验文件核对。卸载保留本地授权与配置；若需撤销 Claude Code 接入，请先在应用中点击“恢复原配置”。
+安装包尚未代码签名，可使用附带的 SHA-256 校验文件核对。v1.0.4 的正常卸载会清理本地授权、配置与备份；升级安装保留数据。卸载前请退出 Claude Code 和 CC Switch，避免客户端配置被同时修改。
 
 应用数据存储在 `%LOCALAPPDATA%\CodexAnywhere`。
 

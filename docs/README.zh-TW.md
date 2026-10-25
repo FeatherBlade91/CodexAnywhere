@@ -14,6 +14,10 @@
 
 </div>
 
+**v1.0.4：** 最佳化 AI 請求前的憑證讀取與模型清單更新，詳見[效能測量](PERFORMANCE.md)。接入指南支援完整模型 ID 清單更新及 Python 程式碼複製。API 金鑰可手動更新，或每 1 小時／1 天／7 天自動更新，預設關閉；更新後須修改用戶端金鑰或重新連接。
+
+正常解除安裝會還原受管理的用戶端連接設定並刪除本軟體的本機資料；升級安裝保留帳號與設定。
+
 ![Codex-Anywhere 桌面介面，包含 ChatGPT 登入、OpenAI 應用程式和 Claude Code 連線設定](assets/desktop.png)
 
 *實際 Electron 未登入介面，使用隔離測試資料，金鑰已遮蔽。截圖為暫時測試連接埠，預設連接埠為 `17863`。*
@@ -112,7 +116,7 @@ npm run test:desktop     # 桌面介面測試
 npm run dist             # 建置 Windows 桌面安裝程式
 ```
 
-安裝程式名稱為 `Codex-Anywhere-Setup-1.0.1-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
+安裝程式名稱為 `Codex-Anywhere-Setup-1.0.4-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
 
 開發約定和測試隔離見 [CONTRIBUTING.md](CONTRIBUTING.md)。請保留[第三方聲明](THIRD-PARTY-NOTICES.md)、[專案授權](../LICENSE)及 [OpenAI Devkit 授權](../vendor/siwc/LICENSE)。
 
@@ -127,4 +131,4 @@ DeepSeek Harness 請使用桌面服務顯示的實際連接埠；profile 版的�
 
 在 Mac 上執行 `npm ci`、`npm test`、`npm run test:desktop`，再以 `npm run dist:mac:preview -- --arm64` 建置 Apple Silicon DMG（Intel 使用 `--x64`），最後執行 `node tests/packaged.mjs`。將 DMG 中的應用程式拖入 Applications。
 
-資料位於 `~/Library/Application Support/CodexAnywhere`，登入憑證由系統鑰匙圈保護。關閉視窗後服務繼續在選單列執行，Dock 圖示可重新開啟視窗，Cmd+Q 完全退出。此分支尚未發布正式 Mac Release；簽章、公證和測試範圍見 [macOS 開發說明](MACOS.md)。
+資料位於 `~/Library/Application Support/CodexAnywhere`，登入憑證由系統鑰匙圈保護。關閉視窗後服務繼續在選單列執行，Dock 圖示可重新開啟視窗，Cmd+Q 完全退出。Mac 仍為內測版，下載 [Mac 內測 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1)；簽章、公證和測試範圍見 [macOS 開發說明](MACOS.md)。
