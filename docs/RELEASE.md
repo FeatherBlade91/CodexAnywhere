@@ -1,10 +1,13 @@
 ## macOS beta — v1.0.4-mac-beta.1
 
+**Mac 仍为内测版。** 本次发布 Apple Silicon（arm64）DMG，使用 ad-hoc 签名，尚未进行 Apple 公证。Windows v1.0.4 继续作为正式版。
+
 - Shared Windows/macOS desktop implementation with platform-specific paths, system proxy discovery and CC Switch process checks.
 - macOS Keychain credential encryption through a private main/utility-process channel; Windows DPAPI credentials remain compatible.
 - Native menu-bar icon, application menu, Dock reopening and DMG build targets for arm64/x64.
 - Native Keychain round-trip/restart checks and cross-platform packaged-app validation.
 - Mac CI jobs upload build artifacts; public Mac release publication remains manual until signing and notarization are configured.
+- Verified on macOS 26.1: 87 backend tests and all four packaged desktop tests passed, including native Keychain persistence across an application restart. See [VALIDATION.md](VALIDATION.md) for scope and limitations.
 
 # Codex-Anywhere 1.0.4
 
