@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const MAC_CREDENTIAL_PROVIDER = 'macos-keychain-electron-async-v1';
+export const LINUX_CREDENTIAL_PROVIDER = 'linux-secret-store-electron-async-v1';
 let configured;
 
 // The desktop composition root supplies its privileged provider before loading core.

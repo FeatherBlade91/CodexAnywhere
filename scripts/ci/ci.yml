@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, macos-15-intel]
+        os: [windows-latest, macos-latest, macos-15-intel, ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
@@ -36,4 +36,11 @@ jobs:
       - name: Run offline regression tests
         run: npm test
       - name: Run Electron desktop checks
+        if: runner.os != 'Linux'
         run: npm run test:desktop
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb dbus-x11 gnome-keyring libsecret-1-0 libgtk-3-0t64 libasound2t64
+      - name: Run Linux desktop checks
+        if: runner.os == 'Linux'
+        run: xvfb-run -a bash scripts/test-linux.sh

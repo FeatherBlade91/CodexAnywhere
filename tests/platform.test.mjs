@@ -50,3 +50,32 @@ test('CC Switch detection matches executable names and propagates inspection fai
   assert.equal(mac('/Applications/cc-switch-backup\n/usr/bin/node').isCCSwitchRunning(), false);
   assert.throws(() => createSystem({ platform: 'darwin', run: () => { throw Error('denied'); } }).isCCSwitchRunning(), /denied/);
 });
+
+
+test('Linux paths and desktop proxy discovery honor XDG and lowercase proxy variables', () => {
+  const linux = createSystem({ platform: 'linux', home: '/home/test', env: { XDG_DATA_HOME: '/data' } });
+  assert.equal(linux.stateDir, join('/data', 'CodexAnywhere'));
+  assert.equal(linux.ccPathsFile, join('/data', 'com.ccswitch.desktop', 'app_paths.json'));
+  assert.equal(createSystem({ platform: 'linux', env: { https_proxy: 'http://proxy:80' } }).detectProxy(), 'http://proxy:80');
+  const run = (_, args) => ({ mode: "'manual'", host: "'::1'", port: '7890' })[args[2]];
+  assert.equal(createSystem({ platform: 'linux', env: {}, run }).detectProxy(), 'http://[::1]:7890');
+  assert.equal(createSystem({ platform: 'linux', env: {}, run: () => { throw Error(); } }).detectProxy(), '');
+});
+
+test('Linux autostart persists safely and removes only its own desktop entry', async t => {
+  const { createStartup } = await import('../src/platform/startup.mjs');
+  const { readFile, writeFile, mkdir } = await import('node:fs/promises');
+  const directory = await mkdtemp(join(tmpdir(), 'linux-startup-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const startup = createStartup({}, { platform: 'linux', env: { XDG_CONFIG_HOME: directory, APPIMAGE: '/apps/My App%.AppImage' } });
+  assert.equal(await startup.enabled(), false);
+  await startup.set(true);
+  assert.equal(await startup.enabled(), true);
+  const entry = await readFile(join(directory, 'autostart/codex-anywhere.desktop'), 'utf8');
+  assert.ok(entry.includes('Exec="/apps/My App%%.AppImage"'));
+  await writeFile(join(directory, 'autostart/other.desktop'), 'other');
+  await startup.set(false);
+  assert.equal(await startup.enabled(), false);
+  assert.equal(await readFile(join(directory, 'autostart/other.desktop'), 'utf8'), 'other');
+  await assert.rejects(createStartup({}, { platform: 'linux', env: { XDG_CONFIG_HOME: directory, APPIMAGE: '/bad\nExec=other' } }).set(true), /Invalid application path/);
+});

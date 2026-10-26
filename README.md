@@ -83,7 +83,7 @@ Python 示例已显式绕过环境代理，避免本机 `127.0.0.1` 请求被 `H
 - **账号权限：** 模型、额度和服务端限制取决于你的订阅；软件不会增加权限。可用模型可能变化。
 - **推理强度：** 显式指定的受支持等级原样传给上游；不支持的等级返回错误。同名等级不代表各模型使用相同算力。
 - **上下文：** 客户端的 `[1M]` 设置不会增加服务端限制。Token 统计和客户端费用显示属于估算。
-- **平台：** 已发布版本面向 Windows x64；本分支新增 macOS 测试版构建，见下文。
+- **平台：** 已发布版本面向 Windows x64；本分支支持 macOS 和 Linux 桌面构建，见下文。
 - **隐私：** 授权保存在本机。Issue 中不要上传凭据、API Key 或私人提示词；安装包不包含个人配置。
 - **验证：** [VALIDATION.md](docs/VALIDATION.md) 和 [reports/](docs/reports/) 保留历史协议测试记录，不代表所有桌面操作或当前账号模型都已完成在线验证。
 
@@ -92,7 +92,7 @@ Python 示例已显式绕过环境代理，避免本机 `127.0.0.1` 请求被 `H
 
 ## 开发
 
-环境：Windows 或 macOS、Node.js 24。
+环境：Windows、macOS 或 Linux，Node.js 24。
 
 `src/core/` 存放接口与接入逻辑，`src/desktop/` 存放 Electron 桌面代码；构建辅助脚本位于 `scripts/`，测试位于 `tests/`，指南和历史报告位于 `docs/`。
 
@@ -133,3 +133,17 @@ node tests/packaged.mjs
 打开生成的 DMG，将应用拖入 Applications 后启动。数据保存在 `~/Library/Application Support/CodexAnywhere`；登录凭据由系统钥匙串保护。关闭窗口后服务继续在菜单栏运行，点击 Dock 图标可重新打开，Cmd+Q 完全退出。
 
 Mac 仍为内测版，下载 [Mac 内测 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1)。分发签名、公证及测试范围见 [macOS 开发说明](docs/MACOS.md)。
+
+## Linux 桌面版
+
+Linux 与 Windows、macOS 共用完整界面和业务逻辑，提供 x64 的 `.deb` 和 `.AppImage` 安装包。在 Ubuntu / WSLg 中使用 Node.js 24 构建：
+
+```sh
+npm ci
+npm test
+npm run dist:linux
+bash scripts/test-linux.sh
+bash scripts/test-linux.sh node tests/packaged.mjs
+```
+
+Ubuntu 可安装 `dist/Codex-Anywhere-1.0.4-linux-amd64.deb`；AppImage 需赋予执行权限。登录需要已解锁的 GNOME Keyring 或 KWallet，数据默认存放在 `~/.local/share/CodexAnywhere`。WSL 需要 WSLg 和 D-Bus/密钥环会话。安装依赖、启动与测试范围见 [Linux 使用说明](docs/LINUX.md)。

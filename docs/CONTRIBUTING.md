@@ -10,7 +10,7 @@ Keep changes focused. Preserve third-party notices and the project's noncommerci
 
 ## Development
 
-Use Windows or macOS with Node.js 24:
+Use Windows, macOS or Linux with Node.js 24:
 
 ```powershell
 npm ci
@@ -68,3 +68,5 @@ Update all three README versions when setup or behavior changes. Keep commands, 
 `src/platform/` owns native paths, system proxy discovery, process inspection and credential providers. Core services must not import Electron. `src/desktop/worker.mjs` injects the macOS credential provider before importing the service; only the trusted utility process can request Keychain operations from the main process. The renderer must never receive a general encryption/decryption IPC endpoint. Windows retains its existing DPAPI envelope ID.
 
 Mac builds: `npm run dist:mac:preview -- --arm64` or `--x64`, then `node tests/packaged.mjs`. Run desktop tests in a logged-in graphical session with an unlocked login Keychain. The macOS credential test uses synthetic credentials and a temporary directory. See [MACOS.md](MACOS.md).
+
+Linux builds and isolated native secret-store tests: see [LINUX.md](LINUX.md). The shared native credential test is `tests/native-credentials.e2e.mjs`.

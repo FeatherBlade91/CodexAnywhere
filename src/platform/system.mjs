@@ -12,7 +12,7 @@ export function createSystem({ platform = process.platform, env = process.env, h
     stateDir: env.CHATGPT_BRIDGE_STATE_DIR || join(support, 'CodexAnywhere'),
     ccPathsFile: join(platform === 'win32' ? (env.APPDATA || join(home, 'AppData', 'Roaming')) : support, 'com.ccswitch.desktop', 'app_paths.json'),
     detectProxy() {
-      const explicit = env.HTTPS_PROXY || env.HTTP_PROXY || '';
+      const explicit = env.HTTPS_PROXY || env.https_proxy || env.HTTP_PROXY || env.http_proxy || '';
       if (explicit) return explicit;
       const options = { encoding: 'utf8', windowsHide: true, timeout: 5000 };
       try {
@@ -23,6 +23,16 @@ export function createSystem({ platform = process.platform, env = process.env, h
           return value ? (value.includes('://') ? value : 'http://' + value) : '';
         }
         if (platform === 'darwin') return parseMacProxy(run('/usr/sbin/scutil', ['--proxy'], options));
+        if (platform === 'linux') {
+          const get = (schema, key) => run('gsettings', ['get', schema, key], options).trim().replace(/^'|'$/g, '');
+          if (get('org.gnome.system.proxy', 'mode') !== 'manual') return '';
+          for (const kind of ['https', 'http']) {
+            const host = get('org.gnome.system.proxy.' + kind, 'host');
+            const port = Number(get('org.gnome.system.proxy.' + kind, 'port'));
+            if (host && !/[\s/@]/.test(host) && Number.isInteger(port) && port > 0 && port <= 65535)
+              return `http://${host.includes(':') && !host.startsWith('[') ? `[${host}]` : host}:${port}`;
+          }
+        }
       } catch { /* System discovery is optional; explicit settings remain available. */ }
       return '';
     },

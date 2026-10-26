@@ -132,3 +132,17 @@ Mac 仍为内测版，下载 [Mac 内测 Release](https://github.com/NamelessDDD
 The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](OPENAI-EXAMPLES.md).
 
 DeepSeek Harness 请使用桌面服务显示的实际端口；profile 版的桌面与 headless 配置分别保存，CLI 与桌面凭据格式也可能不同。上述指南包含配置方法和 `node scripts/live/harness.mjs` 实机工具调用检查。
+
+## Linux 桌面版
+
+Linux 与 Windows、macOS 共用完整界面和业务逻辑，提供 x64 的 `.deb` 和 `.AppImage` 安装包。在 Ubuntu / WSLg 中使用 Node.js 24 构建：
+
+```sh
+npm ci
+npm test
+npm run dist:linux
+bash scripts/test-linux.sh
+bash scripts/test-linux.sh node tests/packaged.mjs
+```
+
+Ubuntu 可安装 `dist/Codex-Anywhere-1.0.4-linux-amd64.deb`；AppImage 需赋予执行权限。登录需要已解锁的 GNOME Keyring 或 KWallet，数据默认存放在 `~/.local/share/CodexAnywhere`。WSL 需要 WSLg 和 D-Bus/密钥环会话。安装依赖、启动与测试范围见 [Linux 使用说明](LINUX.md)。

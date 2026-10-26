@@ -1,11 +1,11 @@
-import { MAC_CREDENTIAL_PROVIDER } from '../platform/credentials.mjs';
+import { MAC_CREDENTIAL_PROVIDER, LINUX_CREDENTIAL_PROVIDER } from '../platform/credentials.mjs';
 
 const channel = 'credential-storage';
 const maxSize = 8 * 1024 * 1024;
 
 // This channel exists only between the trusted worker and main process. It is
 // deliberately absent from the renderer IPC allowlist and preload API.
-export function createCredentialClient(port, { timeout = 120000 } = {}) {
+export function createCredentialClient(port, { timeout = 120000, platform = process.platform } = {}) {
   let sequence = 0;
   const pending = new Map();
   const receive = ({ data }) => {
@@ -27,7 +27,7 @@ export function createCredentialClient(port, { timeout = 120000 } = {}) {
     });
   }
   return {
-    id: MAC_CREDENTIAL_PROVIDER,
+    id: platform === 'linux' ? LINUX_CREDENTIAL_PROVIDER : MAC_CREDENTIAL_PROVIDER,
     isAvailable: () => request('available'),
     encrypt: async text => Buffer.from(await request('encrypt', text)),
     decrypt: bytes => request('decrypt', Uint8Array.from(bytes)),
@@ -44,9 +44,11 @@ export async function handleCredentialMessage(message, safeStorage, reply) {
   const { id, operation, value } = message;
   try {
     let result;
-    if (operation === 'available') result = await safeStorage.isAsyncEncryptionAvailable();
+    const available = await safeStorage.isAsyncEncryptionAvailable() &&
+      (!safeStorage.getSelectedStorageBackend || !['basic_text', 'unknown'].includes(safeStorage.getSelectedStorageBackend()));
+    if (operation === 'available') result = available;
     else {
-      if (!await safeStorage.isAsyncEncryptionAvailable()) throw new Error('Unavailable');
+      if (!available) throw new Error('Unavailable');
       if (operation === 'encrypt' && typeof value === 'string' && Buffer.byteLength(value) <= maxSize) result = await safeStorage.encryptStringAsync(value);
       else if (operation === 'decrypt' && value instanceof Uint8Array && value.byteLength <= maxSize) result = (await safeStorage.decryptStringAsync(Buffer.from(value))).result;
       else throw new Error('Invalid credential request');

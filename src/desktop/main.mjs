@@ -4,9 +4,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadLanguage, saveLanguage } from './language.mjs';
 import { translator } from './renderer/i18n.js';
 
+import { createStartup } from '../platform/startup.mjs';
 import { system } from '../platform/system.mjs';
 import { isCredentialMessage, handleCredentialMessage } from './credential-channel.mjs';
 
+const startup = createStartup(app);
 const here = dirname(fileURLToPath(import.meta.url));
 const page = pathToFileURL(join(here, 'renderer/index.html')).href;
 let window, worker, tray, quitting = false, workerError;
@@ -39,7 +41,7 @@ function startWorker() {
   const activeWorker = worker;
   worker.on('message', message => {
     if (isCredentialMessage(message)) {
-      if (system.platform === 'darwin') void handleCredentialMessage(message, safeStorage, reply => {
+      if (['darwin', 'linux'].includes(system.platform)) void handleCredentialMessage(message, safeStorage, reply => {
         if (worker === activeWorker) activeWorker.postMessage(reply);
       });
       return;
@@ -67,7 +69,7 @@ function showWindow() {
 function createTray() {
   const icon = system.platform === 'darwin'
     ? nativeImage.createFromPath(join(here, 'assets/trayTemplate.png'))
-    : join(here, 'assets/icon.ico');
+    : system.platform === 'linux' ? nativeImage.createFromPath(join(here, 'assets/icon.png')).resize({ width: 32, height: 32 }) : join(here, 'assets/icon.ico');
   if (system.platform === 'darwin') icon.setTemplateImage(true);
   tray = new Tray(icon);
   tray.setToolTip(t('Codex-Anywhere — 后台运行'));
@@ -109,7 +111,7 @@ if (process.argv.includes('--uninstall-cleanup')) {
     process.env.CHATGPT_BRIDGE_STATE_DIR = stateDir;
     await prepareUninstall({ stateDir,
       restore: async () => { const { restoreIntegration } = await import('../core/integration.mjs'); await restoreIntegration(); },
-      disableStartup: () => app.setLoginItemSettings({ openAtLogin: false }),
+      disableStartup: () => startup.set(false),
     });
     app.exit(0);
   }).catch(error => {
@@ -147,7 +149,7 @@ else {
       if (method === 'setLaunchAtLogin') {
         if (typeof args !== 'boolean') throw new Error(t('无效的启动设置。'));
         if (!app.isPackaged) throw new Error(t('开机启动仅在安装版中可用。'));
-        app.setLoginItemSettings({ openAtLogin: args }); return args;
+        await startup.set(args); return args;
       }
       if (method === 'openDataFolder') {
         const state = await request('status');
@@ -157,7 +159,7 @@ else {
       }
       if (!allowed.has(method)) throw new Error(t('未知操作。'));
       const result = await request(method, args);
-      if (method === 'status') return { ...result, version: app.getVersion(), launchAtLogin: app.isPackaged && app.getLoginItemSettings().openAtLogin };
+      if (method === 'status') return { ...result, version: app.getVersion(), launchAtLogin: app.isPackaged && await startup.enabled() };
       return result;
     });
     createTray();

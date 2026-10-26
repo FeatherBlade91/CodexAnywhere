@@ -5,24 +5,21 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-test('macOS Keychain encrypts on disk and decrypts after an application restart', { skip: process.platform !== 'darwin', timeout: 180000 }, async () => {
+test('Native secret store encrypts on disk and decrypts after an application restart', { skip: !['darwin', 'linux'].includes(process.platform), timeout: 180000 }, async () => {
   const dir = await mkdtemp(join(tmpdir(), 'bridge-keychain-'));
   const env = { ...process.env, CHATGPT_BRIDGE_STATE_DIR: dir };
   delete env.ELECTRON_RUN_AS_NODE;
   const options = process.env.BRIDGE_TEST_EXE ? { executablePath: resolve(process.env.BRIDGE_TEST_EXE), args: [] } : { args: [resolve('.')] };
+  options.args.unshift('-r', resolve('tests/fixtures/native-storage.cjs'));
   options.args.push(`--user-data-dir=${join(dir, 'profile')}`);
   let desktop;
   try {
     for (const write of [true, false]) {
       desktop = await electron.launch({ ...options, env });
-      // Playwright enables a mock keychain by default. Remove its overrides before
-      // the first safeStorage call so this test exercises the native credential store.
-      assert.equal(await desktop.evaluate(({ app }) => {
-        app.commandLine.removeSwitch('use-mock-keychain');
-        app.commandLine.removeSwitch('password-store');
-        return app.commandLine.hasSwitch('use-mock-keychain') || app.commandLine.hasSwitch('password-store');
-      }), false);
       await (await desktop.firstWindow()).locator('#toggle-service:not([disabled])').waitFor();
+      const storageStatus = await desktop.evaluate(async ({ safeStorage }) => ({ available: await safeStorage.isAsyncEncryptionAvailable(), backend: safeStorage.getSelectedStorageBackend?.() }));
+      assert.equal(storageStatus.available, true, JSON.stringify(storageStatus));
+      if (process.platform === 'linux') assert.ok(!['basic_text', 'unknown'].includes(storageStatus.backend), JSON.stringify(storageStatus));
       const result = await desktop.evaluate(async ({ app, utilityProcess, safeStorage }, { fixture, directory, write }) => {
         const { createRequire } = process.getBuiltinModule('node:module');
         const { join } = process.getBuiltinModule('node:path');
@@ -39,7 +36,7 @@ test('macOS Keychain encrypts on disk and decrypts after an application restart'
       }, { fixture: resolve('tests/fixtures/credential-worker.mjs'), directory: join(dir, 'synthetic-auth'), write });
       assert.equal(result.error, undefined);
       assert.equal(result.roundTrip, true); assert.equal(result.encrypted, true);
-      assert.equal(result.provider, 'macos-keychain-electron-async-v1');
+      assert.equal(result.provider, process.platform === 'linux' ? 'linux-secret-store-electron-async-v1' : 'macos-keychain-electron-async-v1');
       await desktop.close(); desktop = undefined;
     }
   } finally { if (desktop) await desktop.close(); await rm(dir, { recursive: true, force: true }); }

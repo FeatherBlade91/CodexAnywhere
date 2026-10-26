@@ -17,7 +17,7 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
   await new Promise(r => probe.close(r));
   await writeFile(join(dir, 'bridge.json'), JSON.stringify({ port, localKey: 'isolated-desktop-test-key', proxy: '', model: 'test-model' }));
   await writeFile(join(dir,'models.json'), JSON.stringify({models:['gpt-6-luna','gpt-6-sol','gpt-6.1-sol','gpt-6-astra','gpt-5.6-sol'].map(slug=>({slug}))}));
-  const env = { ...process.env, CHATGPT_BRIDGE_STATE_DIR: dir };
+  const env = { ...process.env, CHATGPT_BRIDGE_STATE_DIR: dir, XDG_CONFIG_HOME: join(dir, 'xdg-config') };
   await writeFile(join(dir, 'desktop-settings.json'), JSON.stringify({ language: 'zh-CN' }));
   delete env.ELECTRON_RUN_AS_NODE;
   const options = process.env.BRIDGE_TEST_EXE ? { executablePath: resolve(process.env.BRIDGE_TEST_EXE), args: [] } : { args: [resolve('.')] };
@@ -35,6 +35,13 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
     await page.locator('#toggle-service').filter({ hasText: '启动服务' }).waitFor();
     assert.equal(await page.evaluate(() => typeof window.require), 'undefined');
     assert.equal(await page.locator('#api-key').getAttribute('type'), 'password');
+    if (process.platform === 'linux' && process.env.BRIDGE_TEST_EXE) {
+      assert.equal(await page.evaluate(() => window.bridge.invoke('setLaunchAtLogin', true)), true);
+      assert.equal((await page.evaluate(() => window.bridge.invoke('status'))).launchAtLogin, true);
+      assert.equal(await page.evaluate(() => window.bridge.invoke('setLaunchAtLogin', false)), false);
+      assert.equal((await page.evaluate(() => window.bridge.invoke('status'))).launchAtLogin, false);
+    }
+
     assert.equal(await page.locator('#base-url').inputValue(), `http://127.0.0.1:${port}/v1`);
     assert.equal(await page.locator('#guide-models .model-id').count(), 5);
     const example = await page.locator('#python-example').textContent();

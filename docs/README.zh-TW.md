@@ -121,3 +121,9 @@ DeepSeek Harness 請使用桌面服務顯示的實際連接埠；profile 版的�
 在 Mac 上執行 `npm ci`、`npm test`、`npm run test:desktop`，再以 `npm run dist:mac:preview -- --arm64` 建置 Apple Silicon DMG（Intel 使用 `--x64`），最後執行 `node tests/packaged.mjs`。將 DMG 中的應用程式拖入 Applications。
 
 資料位於 `~/Library/Application Support/CodexAnywhere`，登入憑證由系統鑰匙圈保護。關閉視窗後服務繼續在選單列執行，Dock 圖示可重新開啟視窗，Cmd+Q 完全退出。Mac 仍為內測版，下載 [Mac 內測 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1)；簽章、公證和測試範圍見 [macOS 開發說明](MACOS.md)。
+
+## Linux 桌面版
+
+Linux 與 Windows、macOS 共用完整介面與業務邏輯，提供 x64 DEB 和 AppImage。使用 Node.js 24 執行 `npm ci`、`npm test`、`npm run dist:linux`；以 `bash scripts/test-linux.sh` 及 `bash scripts/test-linux.sh node tests/packaged.mjs` 驗證桌面與原生憑證儲存。
+
+登入需要已解鎖的 GNOME Keyring 或 KWallet，資料預設位於 `~/.local/share/CodexAnywhere`。WSL 需要 WSLg 與 D-Bus／密鑰環工作階段。詳見 [Linux 說明](LINUX.md)。

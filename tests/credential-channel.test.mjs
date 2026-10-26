@@ -35,3 +35,16 @@ test('lost replies time out and disposing rejects pending operations', async () 
   await assert.rejects(pending, /closed/);
   assert.equal(port.listenerCount('message'), 0);
 });
+
+
+test('Linux refuses plaintext fallback even when Electron reports encryption available', async () => {
+  for (const backend of ['basic_text', 'unknown']) {
+    let reply;
+    const storage = { isAsyncEncryptionAvailable: async () => true, getSelectedStorageBackend: () => backend,
+      encryptStringAsync: () => assert.fail('must not encrypt with fallback') };
+    await handleCredentialMessage({ id: 1, operation: 'available' }, storage, value => reply = value);
+    assert.equal(reply.result, false);
+    await handleCredentialMessage({ id: 2, operation: 'encrypt', value: 'secret' }, storage, value => reply = value);
+    assert.ok(reply.error);
+  }
+});

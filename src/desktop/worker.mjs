@@ -2,7 +2,7 @@ import { configureCredentialEncryption } from '../platform/credentials.mjs';
 import { createCredentialClient, isCredentialMessage } from './credential-channel.mjs';
 const port = process.parentPort;
 if (!port) throw new Error('Desktop worker requires an Electron utility process.');
-if (process.platform === 'darwin') configureCredentialEncryption(createCredentialClient(port));
+if (['darwin', 'linux'].includes(process.platform)) configureCredentialEncryption(createCredentialClient(port));
 // Register the port listener before yielding to module initialization. Otherwise
 // an early status request can be lost while the dynamic import is still loading.
 const ready = import('./service.mjs').then(({ createDesktopService }) => createDesktopService());

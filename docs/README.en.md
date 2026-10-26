@@ -121,3 +121,9 @@ Use the actual port displayed by the desktop service for DeepSeek Harness. Profi
 On a Mac, run `npm ci`, `npm test`, and `npm run test:desktop`, then `npm run dist:mac:preview -- --arm64` for an Apple Silicon DMG (use `--x64` for Intel), followed by `node tests/packaged.mjs`. Drag the application from the DMG into Applications.
 
 Data lives in `~/Library/Application Support/CodexAnywhere`; credentials are protected by Keychain. Closing the window keeps the service running in the menu bar. Click the Dock icon to reopen, or Cmd+Q to quit. Mac remains in beta: download the [Mac beta release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1). See [macOS development notes](MACOS.md) for signing, notarization, and validation scope.
+
+## Linux desktop
+
+Linux shares the full interface and business logic with Windows and macOS. Build x64 DEB and AppImage packages with Node.js 24: `npm ci`, `npm test`, then `npm run dist:linux`. Run GUI and native credential checks with `bash scripts/test-linux.sh`, followed by `bash scripts/test-linux.sh node tests/packaged.mjs`.
+
+Sign-in requires an unlocked GNOME Keyring or KWallet. Data defaults to `~/.local/share/CodexAnywhere`. WSL requires WSLg and a D-Bus/secret-store session. See [Linux setup and validation](LINUX.md).
