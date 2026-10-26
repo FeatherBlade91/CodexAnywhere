@@ -1,8 +1,11 @@
-import { app, BrowserWindow, ipcMain, clipboard, shell, utilityProcess, dialog, Tray, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, clipboard, shell, utilityProcess, dialog, Tray, Menu, safeStorage, nativeImage } from 'electron';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadLanguage, saveLanguage } from './language.mjs';
 import { translator } from './renderer/i18n.js';
+
+import { system } from '../platform/system.mjs';
+import { isCredentialMessage, handleCredentialMessage } from './credential-channel.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const page = pathToFileURL(join(here, 'renderer/index.html')).href;
@@ -24,8 +27,7 @@ function request(method, args) {
 }
 
 function startWorker() {
-  const local = process.env.LOCALAPPDATA || app.getPath('userData');
-  const stateDir = process.env.CHATGPT_BRIDGE_STATE_DIR || join(local, 'CodexAnywhere');
+  const stateDir = system.stateDir;
   const appId = 'chatgpt-claude-bridge';
   const appName = 'Codex-Anywhere';
   worker = utilityProcess.fork(join(here, 'worker.mjs'), [], {
@@ -34,7 +36,14 @@ function startWorker() {
   });
   // Never forward backend logs or credentials into the renderer console.
   worker.stdout?.resume(); worker.stderr?.resume();
+  const activeWorker = worker;
   worker.on('message', message => {
+    if (isCredentialMessage(message)) {
+      if (system.platform === 'darwin') void handleCredentialMessage(message, safeStorage, reply => {
+        if (worker === activeWorker) activeWorker.postMessage(reply);
+      });
+      return;
+    }
     const item = pending.get(message.id);
     if (!item) return;
     clearTimeout(item.timer); pending.delete(message.id);
@@ -56,7 +65,11 @@ function showWindow() {
 }
 
 function createTray() {
-  tray = new Tray(join(here, 'assets/icon.ico'));
+  const icon = system.platform === 'darwin'
+    ? nativeImage.createFromPath(join(here, 'assets/trayTemplate.png'))
+    : join(here, 'assets/icon.ico');
+  if (system.platform === 'darwin') icon.setTemplateImage(true);
+  tray = new Tray(icon);
   tray.setToolTip(t('Codex-Anywhere — 后台运行'));
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: t('打开 Codex-Anywhere'), click: showWindow },
@@ -91,7 +104,7 @@ if (process.argv.includes('--uninstall-cleanup')) {
   else app.whenReady().then(async () => {
     const { prepareUninstall } = await import('../core/uninstall.mjs');
     const argument = process.argv.indexOf('--uninstall-state-dir');
-    const stateDir = argument >= 0 ? process.argv[argument + 1] : process.env.CHATGPT_BRIDGE_STATE_DIR || join(process.env.LOCALAPPDATA || app.getPath('userData'), 'CodexAnywhere');
+    const stateDir = argument >= 0 ? process.argv[argument + 1] : system.stateDir;
     if (!stateDir) throw new Error('Missing uninstall data directory.');
     process.env.CHATGPT_BRIDGE_STATE_DIR = stateDir;
     await prepareUninstall({ stateDir,
@@ -108,9 +121,12 @@ else {
   app.on('second-instance', showWindow);
   app.on('activate', showWindow);
   app.whenReady().then(async () => {
-    languagePath = join(process.env.CHATGPT_BRIDGE_STATE_DIR || app.getPath('userData'), 'desktop-settings.json');
+    languagePath = join(system.platform === 'win32' ? (process.env.CHATGPT_BRIDGE_STATE_DIR || app.getPath('userData')) : system.stateDir, 'desktop-settings.json');
     locale = await loadLanguage(languagePath, app.getPreferredSystemLanguages());
     t = translator(locale.language);
+    if (system.platform === 'darwin') Menu.setApplicationMenu(Menu.buildFromTemplate([
+      { role: 'appMenu' }, { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
+    ]));
     startWorker();
     ipcMain.handle('bridge:invoke', async (event, method, args) => {
       if (event.sender !== window?.webContents || event.senderFrame !== window.webContents.mainFrame || event.senderFrame.url !== page) throw new Error(t('拒绝未知窗口的请求。'));

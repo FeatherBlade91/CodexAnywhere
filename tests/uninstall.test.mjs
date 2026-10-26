@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { prepareUninstall } from '../src/core/uninstall.mjs';
 async function fixture(t, integration) {
-  const stateDir = await mkdtemp(join(tmpdir(), 'uninstall-test-'));
+  const stateDir = await realpath(await mkdtemp(join(tmpdir(), 'uninstall-test-')));
   t.after(() => rm(stateDir, { recursive: true, force: true }));
   await writeFile(join(stateDir, 'bridge.json'), JSON.stringify({ integration }));
   return stateDir;

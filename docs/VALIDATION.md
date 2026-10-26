@@ -2,6 +2,35 @@
 
 [Back to README](../README.md)
 
+## v1.0.4-mac-beta.1 — 2026-10-26
+
+The Apple Silicon DMG was built and tested on a Mac mini running macOS 26.1
+with Node.js 24.13.0 and Electron 45.0.0. All 87 backend tests passed without
+skips on both Windows and Mac. The three shared packaged-desktop tests passed
+on both platforms; the additional native Mac Keychain test also passed.
+
+Shared checks cover protocol adapters, integration/restore fixtures, model and
+proxy settings, API key rotation, service start/stop, tray persistence, language
+confirmation/persistence/relaunch, Python example execution and responsive UI.
+The Mac desktop check also exercises Dock activation while the service stays
+available. The credential check removes Playwright's mock-Keychain overrides,
+writes synthetic encrypted credentials and decrypts them after a complete app
+restart. The Mac user approved access to the existing Keychain item for this
+ad-hoc-signed build; subsequent complete validation passed in the user's desktop
+session. SSH-only runs could not authorize that access.
+
+Packaged source equality, ASAR integrity, native signature verification and
+`hdiutil verify` passed. The downloaded DMG's SHA-256 matched the Mac build:
+
+`38392088d7e0df8e9761020096d866e41563fdb7c691da2571dba40bf4507bdf`
+
+This is an **internal beta**, not a Developer ID-signed or notarized release.
+Intel Macs, login after an OS reboot, and real ChatGPT sign-in/upstream generation
+were not tested. Native Keychain validation used synthetic data. The Windows
+v1.0.4 installer remains the stable release; this beta publishes only the arm64
+Mac DMG and its checksum. Logs are retained in the test machine's
+`codex-macos-test/run-e9a1b88/app/test-results/` directory.
+
 ## v1.0.4 — 2026-10-25
 
 All 78 backend tests passed, including credential caching/rotation/cancellation, model refresh/persistence, local API key rotation, and uninstall preparation. All three packaged Electron tests passed. Packaged source equality (including new icons, the credential store and uninstall helper), ASAR integrity, and Windows DPAPI checks passed.

@@ -139,6 +139,12 @@ test('Electron desktop: isolated IPC, unified service, settings, confirmation an
     await desktop.evaluate(({ app }) => app.emit('second-instance'));
     assert.equal(await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible()), true);
     assert.equal((await fetch(`http://127.0.0.1:${port}/health`)).status, 200);
+    if (process.platform === 'darwin') {
+      await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+      await desktop.evaluate(({ app }) => app.emit('activate'));
+      assert.equal(await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible()), true);
+      assert.equal((await fetch(`http://127.0.0.1:${port}/health`)).status, 200);
+    }
     await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
     await desktop.close(); closed = true;
     await assert.rejects(fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(2000) }));

@@ -16,14 +16,14 @@ test('desktop language detection, cancellation, persistence and restart request'
   let desktop;
   try {
     desktop = await launch();
-    let page = await desktop.firstWindow();
+    let page = await desktop.firstWindow(); page.setDefaultTimeout(15000);
     await page.locator('#toggle-service:not([disabled])').waitFor();
     const system = await desktop.evaluate(({ app }) => app.getPreferredSystemLanguages());
     assert.equal(await page.locator('html').getAttribute('lang'), resolveLanguage('system', system));
     await desktop.close(); desktop = undefined;
     for (const [language, heading, next] of [['en', 'Settings', 'zh-TW'], ['zh-TW', '設定', 'zh-CN'], ['zh-CN', '设置', 'en']]) {
       await writeFile(join(dir, 'desktop-settings.json'), JSON.stringify({ language }));
-      desktop = await launch(); page = await desktop.firstWindow();
+      desktop = await launch(); page = await desktop.firstWindow(); page.setDefaultTimeout(15000);
       const errors = []; page.on('pageerror', error => errors.push(error.message));
       await page.locator('#toggle-service:not([disabled])').waitFor();
       assert.equal(await page.locator('html').getAttribute('lang'), language);
@@ -54,15 +54,30 @@ test('desktop language detection, cancellation, persistence and restart request'
       await desktop.evaluate(({ app }) => { globalThis.languageRestart = []; app.relaunch = () => globalThis.languageRestart.push('relaunch'); app.quit = () => globalThis.languageRestart.push('quit'); });
       await page.locator('#language').selectOption(next);
       await page.locator('#confirm-action').click();
+      // Wait for the main-process effect, not an initially enabled control: on
+      // a fast Mac the click can return before the async confirmation handler runs.
+      await desktop.evaluate(() => new Promise((resolve, reject) => {
+        const deadline = Date.now() + 10000;
+        const check = () => {
+          if (globalThis.languageRestart.length === 2) resolve();
+          else if (Date.now() >= deadline) reject(new Error('Language restart was not requested'));
+          else setTimeout(check, 20);
+        };
+        check();
+      }));
       await page.waitForFunction(() => !document.querySelector('#language').disabled);
       assert.deepEqual(await desktop.evaluate(() => globalThis.languageRestart), ['relaunch', 'quit']);
       assert.equal(JSON.parse(await readFile(join(dir, 'desktop-settings.json'), 'utf8')).language, next);
       assert.deepEqual(errors, []);
       await desktop.evaluate(({ app }) => app.exit(0)); desktop = undefined;
-      desktop = await launch(); page = await desktop.firstWindow();
+      desktop = await launch(); page = await desktop.firstWindow(); page.setDefaultTimeout(15000);
       await page.locator('#toggle-service:not([disabled])').waitFor();
       assert.equal(await page.locator('html').getAttribute('lang'), next);
       await desktop.close(); desktop = undefined;
     }
-  } finally { if (desktop) await desktop.close(); await rm(dir, { recursive: true, force: true }); }
+  } finally { if (desktop) {
+    // A failed assertion must not leave the mocked quit method blocking cleanup.
+    await desktop.evaluate(({ app }) => app.exit(0)).catch(() => {});
+    await desktop.close().catch(() => {});
+  } await rm(dir, { recursive: true, force: true }); }
 });

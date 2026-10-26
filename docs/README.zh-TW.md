@@ -40,7 +40,7 @@ Claude Code 和 CC Switch 是選用的用戶端，需要另外安裝。使用 Op
 | 連接 Claude Code | 套用直接連線設定，或新增 CC Switch 供應商。 |
 | 選擇模型 | 重新整理帳號模型清單，從可用模型中選擇。 |
 | 管理服務 | 啟動、停止、查看狀態。 |
-| 調整執行方式 | 設定 Proxy 或 Windows 登入時啟動。 |
+| 調整執行方式 | 設定 Proxy 或登入電腦時啟動。 |
 | 復原用戶端設定 | 透過連接設定還原備份。 |
 
 修改用戶端設定需要主動操作，並會備份原設定；還原時盡量保留無關修改。預設模型對應為 Haiku → `gpt-6-luna`、Sonnet → `gpt-6-sol`、Opus → `gpt-6.1-sol`、Fable → `gpt-6-astra`，可在設定中修改。變更連線或模型對應後重新啟動 Claude Code。使用 CC Switch 時，在 CC Switch 中選擇已設定的供應商。
@@ -81,7 +81,7 @@ Python 範例已明確略過環境 Proxy，避免本機 `127.0.0.1` 請求被 `H
 - **帳號權限：** 模型、額度和伺服器限制取決於你的訂閱；軟體不會增加權限。可用模型可能變動。
 - **推理強度：** 明確指定的受支援等級原樣傳給上游；不支援的等級傳回錯誤。同名等級不代表各模型使用相同算力。
 - **上下文：** 用戶端的 `[1M]` 設定不會增加伺服器限制。Token 統計和用戶端費用顯示屬於估算。
-- **平台：** 目前桌面 Release 面向 Windows x64，不發布其他架構或作業系統的桌面版本。
+- **平台：** 已發布版本面向 Windows x64；本分支新增 macOS 測試版建置。
 - **隱私：** 授權儲存在本機。Issue 中不要上傳憑證、API Key 或私人提示詞；安裝程式不包含個人設定。
 - **驗證：** [VALIDATION.md](VALIDATION.md) 和 [reports/](reports/) 保留歷史協定測試記錄，不代表所有桌面操作或目前帳號模型都已完成線上驗證。
 
@@ -90,7 +90,7 @@ Python 範例已明確略過環境 Proxy，避免本機 `127.0.0.1` 請求被 `H
 
 ## 開發
 
-環境：Windows、Node.js 24、PowerShell。
+環境：Windows 或 macOS、Node.js 24。
 
 `src/core/` 存放介面與連接邏輯，`src/desktop/` 存放 Electron 桌面程式碼；建置輔助腳本位於 `scripts/`，測試位於 `tests/`，指南和歷史報告位於 `docs/`。
 
@@ -115,3 +115,9 @@ npm run dist             # 建置 Windows 桌面安裝程式
 首頁提供模型 ID、最簡單的 Python 聊天程式及思考強度對應說明，詳見 [OpenAI / DeepSeek Harness 設定範例](OPENAI-EXAMPLES.md)。
 
 DeepSeek Harness 請使用桌面服務顯示的實際連接埠；profile 版的桌面與 headless 設定分別儲存，CLI 與桌面憑證格式也可能不同。上述指南包含設定方式與 `node scripts/live/harness.mjs` 實機工具呼叫檢查。
+
+## macOS 測試版
+
+在 Mac 上執行 `npm ci`、`npm test`、`npm run test:desktop`，再以 `npm run dist:mac:preview -- --arm64` 建置 Apple Silicon DMG（Intel 使用 `--x64`），最後執行 `node tests/packaged.mjs`。將 DMG 中的應用程式拖入 Applications。
+
+資料位於 `~/Library/Application Support/CodexAnywhere`，登入憑證由系統鑰匙圈保護。關閉視窗後服務繼續在選單列執行，Dock 圖示可重新開啟視窗，Cmd+Q 完全退出。Mac 仍為內測版，下載 [Mac 內測 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1)；簽章、公證和測試範圍見 [macOS 開發說明](MACOS.md)。
