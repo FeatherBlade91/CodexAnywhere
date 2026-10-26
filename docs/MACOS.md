@@ -69,3 +69,11 @@ and run `node tests/packaged.mjs` in that same SSH session. Opening another SSH
 connection can require unlocking again. Do not save the Keychain password in
 scripts, logs, CI configuration, or the repository. Availability checks alone
 are insufficient: the native test verifies real encryption and decryption.
+
+Unlocking a Keychain does not grant a newly signed build access to an existing
+item. An ad-hoc rebuild may require the user to approve access to
+`Codex-Anywhere Safe Storage` on the Mac desktop. Error `-25308`
+(`errSecInteractionNotAllowed`) from an SSH test is not a passing credential
+check. Run the native test in an unlocked graphical session and complete the
+system authorization. The test removes Playwright's mock-Keychain switches
+before invoking secure storage; keep that check enabled for release validation.
