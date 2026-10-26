@@ -4,7 +4,7 @@
 
 [简体中文](../README.md) · [繁體中文](README.zh-TW.md) · [English](README.en.md)
 
-**透過本機 API Key 使用 ChatGPT 訂閱額度。**
+**透過本機 API Key 使用 ChatGPT 訂閱額度**
 
 [下載 Windows 桌面版](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [使用指南](USER-GUIDE.txt) · [參與開發](CONTRIBUTING.md)
 
@@ -14,26 +14,13 @@
 
 </div>
 
-**v1.0.4：** 最佳化 AI 請求前的憑證讀取與模型清單更新，詳見[效能測量](PERFORMANCE.md)。接入指南支援完整模型 ID 清單更新及 Python 程式碼複製。API 金鑰可手動更新，或每 1 小時／1 天／7 天自動更新，預設關閉；更新後須修改用戶端金鑰或重新連接。
-
-正常解除安裝會還原受管理的用戶端連接設定並刪除本軟體的本機資料；升級安裝保留帳號與設定。
-
 ![Codex-Anywhere 桌面介面，包含 ChatGPT 登入、OpenAI 應用程式和 Claude Code 連線設定](assets/desktop.png)
 
-*實際 Electron 未登入介面，使用隔離測試資料，金鑰已遮蔽。截圖為暫時測試連接埠，預設連接埠為 `17863`。*
+登入，啟動本機服務，即可透過 API Key 格式使用 ChatGPT 訂閱額度。
 
-Codex-Anywhere 將原來的 **Plan Bridge** 和 **API Gateway** 合併為獨立的 Electron 桌面軟體。登入一次，啟動一個本機服務，即可連接 Claude Code 或支援 OpenAI 相容介面的應用程式。Release 僅提供桌面安裝程式。
+完全官方，無違規風險。沒有 Codex 附加的多餘上下文，與純淨的按量付費 Key 效果一致，卻直接使用 ChatGPT 訂閱額度。
 
-軟體使用 OpenAI 的 Sign in with ChatGPT Devkit，透過[官方文件介紹的授權方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，讓符合條件的帳號使用自己的 ChatGPT 方案額度。它不反向代理 ChatGPT 網頁，也不重用瀏覽器 Cookie。本機服務負責轉換用戶端請求；產生的 API Key 用於存取這個本機服務，並非 OpenAI 平台 API Key。
-
-使用時仍須符合帳號資格、方案限制、OpenAI 條款和 Devkit 的非商業授權。採用官方授權方式不代表任何用途都完全合規，也不能保證零停權風險；具體使用須遵守 [OpenAI 使用條款](https://openai.com/policies/terms-of-use/)。
-
-```mermaid
-flowchart RL
-    C[Claude Code] -->|Anthropic Messages| B[Codex-Anywhere 桌面版]
-    A[OpenAI 相容應用程式] -->|Chat Completions / Responses| B
-    B -->|同一帳號 · 同一本機服務| S[ChatGPT 訂閱模型]
-```
+軟體使用 OpenAI 的 Sign in with ChatGPT Devkit，透過 [官方文件介紹的授權方式](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt)，讓符合條件的帳號使用自己的 ChatGPT 方案額度。不反向代理 ChatGPT 網頁，不重用瀏覽器 Cookie，只建立本機服務轉換用戶端請求。
 
 ## 開始使用
 
@@ -56,7 +43,7 @@ Claude Code 和 CC Switch 是選用的用戶端，需要另外安裝。使用 Op
 | 調整執行方式 | 設定 Proxy 或登入電腦時啟動。 |
 | 復原用戶端設定 | 透過連接設定還原備份。 |
 
-修改用戶端設定需要主動操作，並會備份原設定；還原時盡量保留無關修改。變更連線後重新啟動 Claude Code。使用 CC Switch 時，在 CC Switch 中選擇已設定的供應商。
+修改用戶端設定需要主動操作，並會備份原設定；還原時盡量保留無關修改。預設模型對應為 Haiku → `gpt-6-luna`、Sonnet → `gpt-6-sol`、Opus → `gpt-6.1-sol`、Fable → `gpt-6-astra`，可在設定中修改。變更連線或模型對應後重新啟動 Claude Code。使用 CC Switch 時，在 CC Switch 中選擇已設定的供應商。
 
 桌面介面支援簡體中文、繁體中文和 English。首次開啟時依系統首選語言選擇（其他語言使用英語）；可在「設定 → 介面語言」切換或選擇「跟隨系統」。確認後儲存並自動重新啟動，取消則保留原設定。重新啟動會停止本機服務並中斷進行中的請求。
 
@@ -86,6 +73,8 @@ Model      使用 GET /v1/models 傳回的模型 ID
 Claude Code 出現 `ECONNREFUSED` 時，先查看錯誤中的位址。CC Switch 可能讓 Claude Code 連接 `127.0.0.1:15721`；即使 Bridge 的 `17863` 服務正常，這個 Proxy 也可能尚未啟動。開啟 CC Switch 並啟動 Proxy，或在桌面應用程式中主動選擇「配置 Claude Code」使用直接連線。
 
 在「设置」中先儲存 Proxy，再按「检测连接」。檢測會檢查已儲存的 Proxy、授權/API 連通性及 Claude Code 目前使用的本機位址，不傳送模型提示詞，也不顯示憑證。
+
+Python 範例已明確略過環境 Proxy，避免本機 `127.0.0.1` 請求被 `HTTP_PROXY` / `ALL_PROXY` 轉送而出現 502。軟體連接 ChatGPT 的上游 Proxy 仍須在設定中配置；其他用戶端可設定 `NO_PROXY=127.0.0.1,localhost`。詳見 [Proxy 與 502 排查](OPENAI-EXAMPLES.md#代理与-502-排查)。聊天範例會消耗額度，僅檢查網路請使用連線測試。
 
 ## 使用範圍
 
