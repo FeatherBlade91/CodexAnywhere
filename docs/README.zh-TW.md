@@ -6,7 +6,7 @@
 
 **透過本機 API Key 使用 ChatGPT 訂閱額度**
 
-[下載 Windows 桌面版](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [使用指南](USER-GUIDE.txt) · [參與開發](CONTRIBUTING.md)
+[下載 Windows 桌面版](https://github.com/FeatherBlade91/CodexAnywhere/releases/latest) · [使用指南](USER-GUIDE.txt) · [參與開發](CONTRIBUTING.md)
 
 ![Windows x64](https://img.shields.io/badge/Windows-x64-36665D?style=flat-square)
 ![Electron desktop](https://img.shields.io/badge/Electron-desktop-506479?style=flat-square)
@@ -24,7 +24,7 @@
 
 ## 開始使用
 
-1. 從[最新 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) 下載 Windows x64 安裝程式，安裝並開啟 **Codex-Anywhere**。安裝程式包含執行環境，無須另裝 Node.js。
+1. 從[最新 Release](https://github.com/FeatherBlade91/CodexAnywhere/releases/latest) 下載 Windows x64 安裝程式，安裝並開啟 **Codex-Anywhere**。安裝程式包含執行環境，無須另裝 Node.js。
 2. 在瀏覽器中完成 ChatGPT 登入，再重新整理可用模型。
 3. 啟動本機服務。將位址和本機 API Key 複製到應用程式，或使用介面中的 Claude Code 連接功能。
 
@@ -105,7 +105,7 @@ npm run test:desktop     # 桌面介面測試
 npm run dist             # 建置 Windows 桌面安裝程式
 ```
 
-安裝程式名稱為 `Codex-Anywhere-Setup-1.0.4-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
+安裝程式名稱為 `Codex-Anywhere-Setup-1.0.5-x64.exe`。本機建置不會自動發布 Release。線上測試需要自己的授權帳號並消耗訂閱額度，分享結果前請去除敏感資訊。
 
 開發約定和測試隔離見 [CONTRIBUTING.md](CONTRIBUTING.md)。請保留[第三方聲明](THIRD-PARTY-NOTICES.md)、[專案授權](../LICENSE)及 [OpenAI Devkit 授權](../vendor/siwc/LICENSE)。
 
@@ -120,7 +120,7 @@ DeepSeek Harness 請使用桌面服務顯示的實際連接埠；profile 版的�
 
 在 Mac 上執行 `npm ci`、`npm test`、`npm run test:desktop`，再以 `npm run dist:mac:preview -- --arm64` 建置 Apple Silicon DMG（Intel 使用 `--x64`），最後執行 `node tests/packaged.mjs`。將 DMG 中的應用程式拖入 Applications。
 
-資料位於 `~/Library/Application Support/CodexAnywhere`，登入憑證由系統鑰匙圈保護。關閉視窗後服務繼續在選單列執行，Dock 圖示可重新開啟視窗，Cmd+Q 完全退出。Mac 仍為內測版，下載 [Mac 內測 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1)；簽章、公證和測試範圍見 [macOS 開發說明](MACOS.md)。
+資料位於 `~/Library/Application Support/CodexAnywhere`，登入憑證由系統鑰匙圈保護。關閉視窗後服務繼續在選單列執行，Dock 圖示可重新開啟視窗，Cmd+Q 完全退出。Mac 仍為內測版，下載 [Mac 內測 Release](https://github.com/FeatherBlade91/CodexAnywhere/releases/tag/v1.0.5)；簽章、公證和測試範圍見 [macOS 開發說明](MACOS.md)。
 
 ## Linux 桌面版
 

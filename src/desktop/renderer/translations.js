@@ -48,7 +48,7 @@ export const translations = Object.fromEntries([
   ['代理地址尚未保存，本次使用的是已保存的设置。', '代理位址尚未儲存，本次使用的是已儲存的設定。', 'Your proxy changes are unsaved. This test used the saved settings.'],
   ['接入指南', '接入指南', 'Setup guide'],
   ['连接控制台', '連線控制台', 'Connection console'],
-  ['从本机，连接你的工具。', '從本機，連接你的工具。', 'Your tools, connected locally.'],
+  ['用 GPT 订阅合规获取纯净 API', '用 GPT 訂閱合規取得純淨 API', 'Get clean API access compliantly with your GPT subscription'],
   ['管理账号、检查连接，再复制应用所需的配置。', '管理帳號、檢查連線，再複製應用程式所需的設定。', 'Manage your account, check connections, and copy settings for your apps.'],
   ['一键测试', '一鍵測試', 'Test connection'],
   ['连接路径', '連線路徑', 'Connection path'],

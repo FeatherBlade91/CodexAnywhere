@@ -17,7 +17,7 @@ node tests/packaged.mjs
 ```
 
 For Intel, use `--x64`. The default build targets the host architecture. The DMG
-is `dist/Codex-Anywhere-1.0.4-mac-beta-arm64.dmg` (or `x64`). To check a custom app
+is `dist/Codex-Anywhere-1.0.5-mac-beta-arm64.dmg` (or `x64`). To check a custom app
 location, set `BRIDGE_PACKAGE_DIR` to the `.app` directory. The packaging check
 verifies ASAR integrity and sources, then exercises the packaged GUI and Keychain.
 Build each architecture on a matching runner for native validation.

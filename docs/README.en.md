@@ -6,7 +6,7 @@
 
 **Use your ChatGPT subscription through a local API key**
 
-[Download for Windows](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [Usage guide](USER-GUIDE.txt) · [Contributing](CONTRIBUTING.md)
+[Download for Windows](https://github.com/FeatherBlade91/CodexAnywhere/releases/latest) · [Usage guide](USER-GUIDE.txt) · [Contributing](CONTRIBUTING.md)
 
 ![Windows x64](https://img.shields.io/badge/Windows-x64-36665D?style=flat-square)
 ![Electron desktop](https://img.shields.io/badge/Electron-desktop-506479?style=flat-square)
@@ -24,7 +24,7 @@ The app uses OpenAI's Sign in with ChatGPT Devkit through the [officially docume
 
 ## Get connected
 
-1. Download the Windows x64 installer from [the latest release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) and open **Codex-Anywhere**. The desktop package includes its runtime; a separate Node.js installation is unnecessary.
+1. Download the Windows x64 installer from [the latest release](https://github.com/FeatherBlade91/CodexAnywhere/releases/latest) and open **Codex-Anywhere**. The desktop package includes its runtime; a separate Node.js installation is unnecessary.
 2. Sign in with ChatGPT in your browser, then refresh the available models.
 3. Start the local service. Copy its URL and local API key into your application, or use the Claude Code connection controls.
 
@@ -105,7 +105,7 @@ npm run test:desktop     # Desktop UI tests
 npm run dist             # Build the Windows desktop installer
 ```
 
-The installer is named `Codex-Anywhere-Setup-1.0.4-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
+The installer is named `Codex-Anywhere-Setup-1.0.5-x64.exe`. Building an installer does not publish a release. Online tests require an authorized account and consume subscription quota; keep their outputs private until sanitized.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and test isolation. Preserve [third-party notices](THIRD-PARTY-NOTICES.md), the [project license](../LICENSE), and the [OpenAI Devkit license](../vendor/siwc/LICENSE).
 
@@ -120,7 +120,7 @@ Use the actual port displayed by the desktop service for DeepSeek Harness. Profi
 
 On a Mac, run `npm ci`, `npm test`, and `npm run test:desktop`, then `npm run dist:mac:preview -- --arm64` for an Apple Silicon DMG (use `--x64` for Intel), followed by `node tests/packaged.mjs`. Drag the application from the DMG into Applications.
 
-Data lives in `~/Library/Application Support/CodexAnywhere`; credentials are protected by Keychain. Closing the window keeps the service running in the menu bar. Click the Dock icon to reopen, or Cmd+Q to quit. Mac remains in beta: download the [Mac beta release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1). See [macOS development notes](MACOS.md) for signing, notarization, and validation scope.
+Data lives in `~/Library/Application Support/CodexAnywhere`; credentials are protected by Keychain. Closing the window keeps the service running in the menu bar. Click the Dock icon to reopen, or Cmd+Q to quit. Mac remains in beta: download the [Mac beta release](https://github.com/FeatherBlade91/CodexAnywhere/releases/tag/v1.0.5). See [macOS development notes](MACOS.md) for signing, notarization, and validation scope.
 
 ## Linux desktop
 

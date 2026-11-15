@@ -6,7 +6,7 @@
 
 **通过本地 API Key 使用 ChatGPT 订阅额度**
 
-[下载 Windows 桌面版](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) · [使用指南](USER-GUIDE.txt) · [参与开发](CONTRIBUTING.md)
+[下载 Windows 桌面版](https://github.com/FeatherBlade91/CodexAnywhere/releases/latest) · [使用指南](USER-GUIDE.txt) · [参与开发](CONTRIBUTING.md)
 
 ![Windows x64](https://img.shields.io/badge/Windows-x64-36665D?style=flat-square)
 ![Electron desktop](https://img.shields.io/badge/Electron-desktop-506479?style=flat-square)
@@ -26,7 +26,7 @@
 
 ## 开始使用
 
-1. 从[最新 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/latest) 下载 Windows x64 安装包，安装并打开 **Codex-Anywhere**。安装包包含运行环境，无须另装 Node.js。
+1. 从[最新 Release](https://github.com/FeatherBlade91/CodexAnywhere/releases/latest) 下载 Windows x64 安装包，安装并打开 **Codex-Anywhere**。安装包包含运行环境，无须另装 Node.js。
 2. 在浏览器中完成 ChatGPT 登录，再刷新可用模型。
 3. 启动本地服务。将地址和本地 API Key 复制到应用，或使用界面中的 Claude Code 接入功能。
 
@@ -107,7 +107,7 @@ npm run test:desktop     # 桌面界面测试
 npm run dist             # 构建 Windows 桌面安装包
 ```
 
-安装包名称为 `Codex-Anywhere-Setup-1.0.4-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
+安装包名称为 `Codex-Anywhere-Setup-1.0.5-x64.exe`。本地构建不会自动发布 Release。在线测试需要自己的授权账号并消耗订阅额度，分享结果前请脱敏。
 
 开发约定和测试隔离见 [CONTRIBUTING.md](CONTRIBUTING.md)。请保留[第三方声明](THIRD-PARTY-NOTICES.md)、[项目许可](../LICENSE)及 [OpenAI Devkit 许可](../vendor/siwc/LICENSE)。
 
@@ -126,7 +126,7 @@ node tests/packaged.mjs
 
 打开生成的 DMG，将应用拖入 Applications 后启动。数据保存在 `~/Library/Application Support/CodexAnywhere`；登录凭据由系统钥匙串保护。关闭窗口后服务继续在菜单栏运行，点击 Dock 图标可重新打开，Cmd+Q 完全退出。
 
-Mac 仍为内测版，下载 [Mac 内测 Release](https://github.com/NamelessDDDoge/Codex-Anywhere/releases/tag/v1.0.4-mac-beta.1)。分发签名、公证及测试范围见 [macOS 开发说明](MACOS.md)。
+Mac 仍为内测版，下载 [Mac 内测 Release](https://github.com/FeatherBlade91/CodexAnywhere/releases/tag/v1.0.5)。分发签名、公证及测试范围见 [macOS 开发说明](MACOS.md)。
 ### OpenAI examples
 
 The home page includes a live model ID, a minimal Python chat example, and reasoning-effort mappings. See [OpenAI / DeepSeek Harness examples](OPENAI-EXAMPLES.md).
@@ -145,4 +145,4 @@ bash scripts/test-linux.sh
 bash scripts/test-linux.sh node tests/packaged.mjs
 ```
 
-Ubuntu 可安装 `dist/Codex-Anywhere-1.0.4-linux-amd64.deb`；AppImage 需赋予执行权限。登录需要已解锁的 GNOME Keyring 或 KWallet，数据默认存放在 `~/.local/share/CodexAnywhere`。WSL 需要 WSLg 和 D-Bus/密钥环会话。安装依赖、启动与测试范围见 [Linux 使用说明](LINUX.md)。
+Ubuntu 可安装 `dist/Codex-Anywhere-1.0.5-linux-amd64.deb`；AppImage 需赋予执行权限。登录需要已解锁的 GNOME Keyring 或 KWallet，数据默认存放在 `~/.local/share/CodexAnywhere`。WSL 需要 WSLg 和 D-Bus/密钥环会话。安装依赖、启动与测试范围见 [Linux 使用说明](LINUX.md)。
