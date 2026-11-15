@@ -1,6 +1,6 @@
 ## v1.0.5 — 2026-11-15
 
-Windows x64 and Apple Silicon macOS were rebuilt from the same source. Both passed 90 offline backend tests. Windows passed all three applicable packaged desktop tests plus DPAPI round-trip, source integrity and license checks. macOS passed source integrity, license checks and three packaged UI tests; native Keychain persistence failed in the SSH session, including after unlocking the login Keychain. This remains an open validation limitation for the Mac beta. No real-account generation was performed.
+Windows x64 and Apple Silicon macOS were rebuilt from the same source. Both passed 90 offline backend tests. Windows passed all three applicable packaged desktop tests plus DPAPI round-trip, source integrity and license checks. macOS passed source integrity, license checks and all four packaged desktop tests, including native Keychain persistence across application restarts. SSH Keychain access initially failed; after desktop authorization, the complete suite passed in the graphical Terminal session. No real-account generation was performed.
 
 The Mac DMG uses ad-hoc signing without Apple notarization. Intel and Linux packages are not included in this release. README screenshots were captured from the 1.0.5 Windows app using isolated state.
 

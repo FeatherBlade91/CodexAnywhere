@@ -6,7 +6,7 @@
 - 固定 macOS 权限文件为 LF 换行，修复从 Windows 源码打包时的签名解析失败。
 
 下载 Windows 的 Setup.exe 或 Apple Silicon Mac 的 mac-beta-arm64.dmg；SHA256SUMS.txt 提供校验值。
-Windows 已通过安装包与桌面验证；Mac 三项界面测试通过，SSH 环境的钥匙串持久化测试未通过，仍为测试版。
+Windows 与 Mac 均已通过安装包及桌面验证，Mac 包括钥匙串跨应用重启加解密测试。
 Mac 包使用 ad-hoc 签名，尚未 Apple 公证；Intel Mac 不在本次发布范围。此次验证为离线回归、桌面及安装包检查，未调用真实账号生成。
 
 ## macOS beta — v1.0.4-mac-beta.1
